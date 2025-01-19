@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.1</version> <!-- Use the latest Spring Boot version -->
+        <version>3.1.5</version> <!-- Use the latest Spring Boot version -->
         <relativePath/>
     </parent>
 
@@ -18,7 +18,7 @@
     <description>Demo project for Spring Boot</description>
 
     <properties>
-        <java.version>20</java.version> <!-- Change to Java 20 (or Java 17) -->
+        <java.version>17</java.version> <!-- Change to Java 20 (or Java 17) -->
     </properties>
 
     <dependencies>
@@ -71,17 +71,16 @@
     </dependencies>
 
     <build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.11.0</version>
-            <configuration>
-                <source>20</source>
-                <target>20</target>
-            </configuration>
-        </plugin>
-    </plugins>
+    <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>3.11.0</version>
+    <configuration>
+        <source>20</source>
+        <target>20</target>
+    </configuration>
+</plugin>
+
 </build>
 
 
