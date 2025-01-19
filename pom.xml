@@ -22,13 +22,6 @@
     </properties>
 
     <dependencies>
-        <!-- Spring Boot Starter Web -->
-        <dependency>
-             <groupId>io.jsonwebtoken</groupId>
-             <artifactId>jjwt</artifactId>
-             <version>0.11.5</version>
-         </dependency>
-
 
 
         <dependency>
