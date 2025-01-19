@@ -24,10 +24,11 @@
     <dependencies>
         <!-- Spring Boot Starter Web -->
         <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-           
-        </dependency>
+             <groupId>io.jsonwebtoken</groupId>
+             <artifactId>jjwt</artifactId>
+             <version>0.11.5</version> <!-- Use the latest stable version -->
+         </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
