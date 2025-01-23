@@ -12,13 +12,13 @@ import com.agri.vision.Model.user;
 @Repository
 public interface userRepo extends JpaRepository<user,Long> {
 
-    Optional<user> findByUsername(String username);
+    user findByUsername(String username);
 
     @Query("select u from user u where u.username = :username")
     public user getUserByUserName(@Param("username") String username);
 
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-
+ 
     Optional<user> findByEmail(String email);
 }

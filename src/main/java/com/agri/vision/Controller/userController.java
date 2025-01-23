@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -38,19 +38,28 @@ import com.agri.vision.Model.wishlist;
 import com.agri.vision.Repo.CartRepo;
 import com.agri.vision.Repo.userRepo;
 import com.agri.vision.Repo.wishlistRepo;
+import com.agri.vision.Service.JwtService;
 import com.agri.vision.Service.UsageService;
 import com.agri.vision.helper.messageHelper;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RestController
 @CrossOrigin(origins = "/**") // this url is react only this will be accept here
 @RequestMapping("/api/v1/auth") // base url http://localhost:8080/ onwards
-public class userController {       
+public class userController {
+
+    @Autowired
+    private JwtService jwtService;
 
     private final UsageService usageService;
 
+    private static final Logger logger = LoggerFactory.getLogger(userController.class);
+
     public userController(UsageService usageService) {
         this.usageService = usageService;
+        // this.jwtService = jwtService;
     }
 
     // autowiring the user repository
@@ -66,9 +75,6 @@ public class userController {
     @Autowired
     private CartRepo cartrepo;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
     public void encodeExistingPasswords() {
         List<user> users = userrepo.findAll();
         for (user user : users) {
@@ -79,13 +85,12 @@ public class userController {
         }
     }
 
-    // add or save the new user here
-    @PostMapping("/user/save")
-    user newUser(@RequestBody user newUser) {
-        return userrepo.save(newUser);
-    }
-
-    // user registration page register using /user/register
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 14 jan 2025
+    // Function : Register New User
+    // take username , email, endname, address, contact, occupation,password
+    ///////////////////////////////////////////
     @PostMapping("/user/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegistrationRequest request) {
         // Check if username already exists
@@ -115,85 +120,80 @@ public class userController {
         return ResponseEntity.ok("User registered successfully!");
     }
 
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 14 jan 2025
+    // Function : Login User
+    // take usename and password and return the email username and token
+    ///////////////////////////////////////////
+    @PostMapping("/user/login")
+    public ResponseEntity<?> signin(@RequestBody LoginReq loginRequest) {
+        try {
+            // Retrieve the user by username
+            user user = userrepo.findByUsername(loginRequest.getUsername());
+
+            // Compare the provided plain password with the hashed password
+            if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+                return ResponseEntity.badRequest().body("Invalid username or password");
+            }
+
+            // Generate a JWT token using JwtService
+            String token = jwtService.generateToken(user.getUsername());
+
+            // Return a success response with the generated token
+            Map<String, Object> response = new HashMap<>();
+            response.put("email", user.getEmail());
+            response.put("username", user.getUsername());
+            response.put("token", token);
+            logger.debug("Generated JWT Token: " + token);
+
+            return ResponseEntity.ok(response);
+
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body("Invalid username or password");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during login");
+        }
+    }
+
     // get all value from database from /user/GetAllData
     @GetMapping("/user/GetAllData")
     List<user> getAllUsers() {
         return userrepo.findAll();
     }
 
-    @PostMapping("/user/login")
-    public ResponseEntity<?> signin(@RequestBody LoginReq loginRequest) {
-        try {
-            // Retrieve the user by username
-            user user = userrepo.findByUsername(loginRequest.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    @PostMapping("/profile")
+    public ResponseEntity<?> getUserProfile(Authentication authentication) {
+        // Correctly get the username from the Authentication object
+        String username = authentication.getName();
+        System.out.println(username);
+        System.out.println(authentication);
 
-            // Log stored encoded password for debugging (Remove in production)
-            System.out.println("Stored password: " + user.getPassword());
-            System.out.println("Stored mail: " + user.getEmail());
+        // Fetch the user from the database
+        user user = userrepo.findByUsername(username);
 
-            // Compare the provided plain password with the hashed password
-            if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-                System.err.println("Authentication failed: Password does not match");
-                return ResponseEntity.badRequest().body("Invalid username or password");
-            }
-
-            // Create the AuthenticationToken with the provided username and password
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword());
-
-            // Authenticate using the AuthenticationManager
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-
-            // String username = authentication.getName();
-            String emailId = user.getEmail();
-
-            // Set the Authentication object in the SecurityContext
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Here you could generate and return an authentication token (e.g., JWT)
-            // For simplicity, just a success message for now
-            return ResponseEntity.ok(emailId);
-
-        } catch (UsernameNotFoundException e) {
-            System.err.println("Authentication failed: " + e.getMessage());
-            return ResponseEntity.badRequest().body("Invalid username or password");
-
-        } catch (Exception e) {
-            System.err.println("Authentication failed: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during login");
-        }
-    }
-
-    @PostMapping("/user/profile")
-    public ResponseEntity<?> getUserProfile(@RequestBody Map<String, String> payload) {
-        String email = payload.get("email");
-        Optional<user> userOptional = userrepo.findByEmail(email);
-
-        if (userOptional.isPresent()) {
-            user user = userOptional.get();
-
-            // Convert the image byte array to Base64 if the profile image exists
-            String base64Image = null;
-            if (user.getProfileImage() != null) {
-                base64Image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(user.getProfileImage());
-            }
-
-            // Build the response with user details and Base64 image
-            Map<String, Object> response = new HashMap<>();
-            response.put("username", user.getUsername());
-            response.put("image", base64Image); // Send Base64 image string
-            response.put("email", user.getEmail());
-            response.put("endname", user.getEndname());
-            response.put("address", user.getAddress());
-            response.put("contact", user.getContact());
-            response.put("occupation", user.getOccupation());
-
-            return ResponseEntity.ok(response);
-        } else {
+        // If the user is not found, handle it appropriately
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
+
+        // Convert the image byte array to Base64 if the profile image exists
+        String base64Image = null;
+        if (user.getProfileImage() != null) {
+            base64Image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(user.getProfileImage());
+        }
+
+        // Build the response with user details and Base64 image
+        Map<String, Object> response = new HashMap<>();
+        response.put("username", user.getUsername());
+        response.put("image", base64Image); // Send Base64 image string
+        response.put("email", user.getEmail());
+        response.put("endname", user.getEndname());
+        response.put("address", user.getAddress());
+        response.put("contact", user.getContact());
+        response.put("occupation", user.getOccupation());
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/user/mail")
@@ -224,7 +224,6 @@ public class userController {
     public ResponseEntity<?> editProfile(
             @RequestPart("data") UserRegistrationRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image) {
-
 
         Optional<user> existingUserOpt = userrepo.findByEmail(request.getEmail());
         if (existingUserOpt.isEmpty()) {

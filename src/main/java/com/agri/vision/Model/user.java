@@ -1,5 +1,6 @@
 package com.agri.vision.Model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,9 +22,10 @@ public class user {
     private String contact;
     private String occupation;
 
-    @Lob // Indicates that this field is a large object (BLOB)
-    private byte[] profileImage; // Field to store profile image
-
+    @Lob
+    @Column(name = "profile_image", columnDefinition = "BLOB")
+    private byte[] profileImage;
+    
     // Getters and setters for profileImage
     public byte[] getProfileImage() {
         return profileImage;
@@ -32,7 +34,7 @@ public class user {
     public void setProfileImage(byte[] profileImage) {
         this.profileImage = profileImage;
     }
-
+ 
     // Getters and setters for other fields
     public Long getId() {
         return id;
@@ -131,4 +133,9 @@ public class user {
             return user;
         }
     }
+
+    public boolean isPresent() {
+        return false;
+    }
+
 }

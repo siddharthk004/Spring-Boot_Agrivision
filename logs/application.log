@@ -1,0 +1,21 @@
+2025-01-23 09:43:46 - Restarting due to 1 class path change (0 additions, 1 deletion, 0 modifications)
+2025-01-23 09:43:46 - Stopping service [Tomcat]
+2025-01-23 09:43:46 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-01-23 09:43:46 - HHH000031: Closing
+2025-01-23 09:43:46 - Un-scoping TypeConfiguration [org.hibernate.type.spi.TypeConfiguration$Scope@78e7c85c] from SessionFactory [org.hibernate.internal.SessionFactoryImpl@279fa22f]
+2025-01-23 09:43:46 - Implicitly destroying ServiceRegistry on de-registration of all child ServiceRegistries
+2025-01-23 09:43:46 - Implicitly destroying Boot-strap registry on de-registration of all child ServiceRegistries
+2025-01-23 09:43:46 - HikariPool-24 - Shutdown initiated...
+2025-01-23 09:43:46 - HikariPool-24 - Before shutdown stats (total=10, active=0, idle=10, waiting=0)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@7c8c2e5b: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@79357b73: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@38087148: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@9faae2f: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@58278e07: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@6a1ecef4: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@5c69b299: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@3a81e821: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@41fc45ff: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@75a799ad: (connection evicted)
+2025-01-23 09:43:46 - HikariPool-24 - After shutdown stats (total=0, active=0, idle=0, waiting=0)
+2025-01-23 09:43:46 - HikariPool-24 - Shutdown completed.

@@ -1,6 +1,5 @@
 package com.agri.vision.Model;
 
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,17 +16,13 @@ public class myAppUserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<user> Myuser = repo.findByUsername(username);
-        if (Myuser.isPresent()) {
-            user userObj = Myuser.get();
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(userObj.getUsername())
-                    .password(userObj.getPassword()) // Ensure this is the hashed password
-                    .roles("USER") // Assign roles
-                    .build();
-        } else {
-            throw new UsernameNotFoundException("User not found");
-        }
+        user userObj = repo.findByUsername(username);
+
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(userObj.getUsername())
+                .password(userObj.getPassword()) // Ensure this is hashed
+                .roles("USER") // You can dynamically fetch roles if needed
+                .build();
     }
 
 }
