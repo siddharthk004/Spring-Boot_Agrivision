@@ -59,7 +59,7 @@ public class securityConfig {
         http.csrf().disable()
                 .cors().configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:3000")); // Add frontend origin
+                    config.setAllowedOrigins(List.of("*")); 
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
                     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
                     return config;

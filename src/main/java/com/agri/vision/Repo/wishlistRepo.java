@@ -9,12 +9,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface wishlistRepo extends JpaRepository<wishlist, Long> {
 
-    boolean existsByEmailAndProductname(String email, String productname);
-
-    int countByEmail(String email);
-
     Optional<wishlist> findById(Integer id);
 
-    List<wishlist> findByEmail(String email);
+    boolean existsByUsernameAndProductname(String usernameFromToken, String productname);
+
+    List<wishlist> findByUsername(String email);
+
+    int countByUsername(String email);
 
 }

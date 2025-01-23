@@ -41,7 +41,6 @@ public class JwtFilter extends OncePerRequestFilter {
             username = jwtService.extractUsername(token);
         }
         logger.debug("Authorization Header: " + authHeader);
-        logger.debug("Extracted Token: " + token);
         logger.debug("Extracted Username: " + username); 
 
 

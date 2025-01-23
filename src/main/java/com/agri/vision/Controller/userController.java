@@ -1,13 +1,9 @@
 package com.agri.vision.Controller;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
-// import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +16,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -41,8 +35,6 @@ import com.agri.vision.Repo.wishlistRepo;
 import com.agri.vision.Service.JwtService;
 import com.agri.vision.Service.UsageService;
 import com.agri.vision.helper.messageHelper;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RestController
@@ -59,10 +51,8 @@ public class userController {
 
     public userController(UsageService usageService) {
         this.usageService = usageService;
-        // this.jwtService = jwtService;
     }
 
-    // autowiring the user repository
     @Autowired
     private userRepo userrepo;
 
@@ -156,12 +146,12 @@ public class userController {
         }
     }
 
-    // get all value from database from /user/GetAllData
-    @GetMapping("/user/GetAllData")
-    List<user> getAllUsers() {
-        return userrepo.findAll();
-    }
-
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 23 jan 2025
+    // Function : View Profile Of USer
+    // take token and return all the details of user
+    ///////////////////////////////////////////
     @PostMapping("/profile")
     public ResponseEntity<?> getUserProfile(Authentication authentication) {
         // Correctly get the username from the Authentication object
@@ -196,42 +186,28 @@ public class userController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/user/mail")
-    public ResponseEntity<?> profileCheck(@RequestParam String email) {
-        try {
-            // Retrieve the user by email
-            user user = userrepo.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("Email Id Not Found"));
-
-            System.out.println(user);
-
-            // If user exists, return success message
-            return ResponseEntity.ok("success");
-
-        } catch (RuntimeException e) {
-            // Handle case where email was not found
-            System.err.println("Authentication failed: " + e.getMessage());
-            return ResponseEntity.badRequest().body("login please | Email Id Not Found");
-
-        } catch (Exception e) {
-            // Handle other general exceptions
-            System.err.println("Error: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
-        }
-    }
-
-    @PostMapping("/user/editprofile")
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 23 jan 2025
+    // Function : edit Profile Of USer
+    // give token and any field that we want to update and return success
+    ///////////////////////////////////////////
+    @PostMapping("/editProfile")
     public ResponseEntity<?> editProfile(
-            @RequestPart("data") UserRegistrationRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @RequestHeader("Authorization") String token, // Get the token from the request header
+            @RequestBody UserRegistrationRequest request) { // Accept data in JSON format
 
-        Optional<user> existingUserOpt = userrepo.findByEmail(request.getEmail());
-        if (existingUserOpt.isEmpty()) {
+        // Extract the username from the token
+        String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in token
+
+        // Find the existing user by username (from the token)
+        user existingUser = userrepo.findByUsername(usernameFromToken);
+        if (existingUser == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-        user existingUser = existingUserOpt.get();
-
+        // Only allow certain fields to be updated (excluding username, email, and
+        // password)
         if (request.getEndname() != null && !request.getEndname().isEmpty()) {
             existingUser.setEndname(request.getEndname());
         }
@@ -245,108 +221,47 @@ public class userController {
             existingUser.setOccupation(request.getOccupation());
         }
 
-        // Handle image upload
-        if (image != null && !image.isEmpty()) {
-            try {
-                existingUser.setProfileImage(image.getBytes());
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Error saving image: " + e.getMessage());
-            }
-        }
-
+        // Save the updated user to the database
         userrepo.save(existingUser);
-        return ResponseEntity.ok("Profile updated successfully!");
+
+        // Return the updated user profile (excluding password, email, username)
+        Map<String, Object> response = new HashMap<>();
+        response.put("username", existingUser.getUsername());
+        response.put("endname", existingUser.getEndname());
+        response.put("address", existingUser.getAddress());
+        response.put("contact", existingUser.getContact());
+        response.put("occupation", existingUser.getOccupation());
+        response.put("profileImage",
+                existingUser.getProfileImage() != null ? "Profile image updated" : "No profile image");
+
+        return ResponseEntity.ok(response); // Return updated details
     }
 
-    @PostMapping("/user/wishlist")
-    public ResponseEntity<?> addToWishlist(
-            @RequestParam String email,
-            @RequestBody wishlist request) {
-        try {
-
-            // Check if the product already exists in the wishlist for the given email
-            boolean exists = wishlistrepo.existsByEmailAndProductname(email, request.getProductname());
-            if (exists) {
-                return ResponseEntity.badRequest().body("Product already exists in the wishlist!");
-            }
-
-            // Create and populate a Wishlist object
-            wishlist wishlist = new wishlist();
-            wishlist.setEmail(email);
-            wishlist.setProductname(request.getProductname());
-            wishlist.setProductcompanyname(request.getProductcompanyname());
-            wishlist.setProductimage(request.getProductimage());
-            wishlist.setBeforediscount(request.getBeforediscount());
-            wishlist.setAfterdiscount(request.getAfterdiscount());
-            wishlist.setDiscount(request.getDiscount());
-
-            // Save to the wishlist repository
-            wishlistrepo.save(wishlist);
-
-            // Return success response
-            return ResponseEntity.ok("Product added to wishlist successfully!");
-
-        } catch (RuntimeException e) {
-            // Handle case where email was not found
-            System.err.println("Error: " + e.getMessage());
-            return ResponseEntity.badRequest().body("Login please | Email Id Not Found");
-
-        } catch (Exception e) {
-            // Handle other general exceptions
-            System.err.println("Error: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
-        }
-    }
-
-    // get all value from database from /user/GetAllData
-    @GetMapping("/user/ViewAllWishlist")
-    public ResponseEntity<?> getAllWishlists(@RequestParam String email) {
-        try {
-            // Fetch wishlists by email
-            List<wishlist> wishlists = wishlistrepo.findByEmail(email);
-
-            if (wishlists.isEmpty()) {
-                // Return a 404 response if no data is found
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No wishlist found for this email.");
-            }
-
-            // Return the list of wishlists
-            return ResponseEntity.ok(wishlists);
-        } catch (Exception e) {
-            // Handle any errors
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while fetching wishlists.");
-        }
-    }
-
-    @GetMapping("/user/{email}")
-    public ResponseEntity<Integer> getUserCount(@PathVariable String email) {
-        int count = usageService.countByEmail(email);
-        return ResponseEntity.ok(count);
-    }
-
-    @GetMapping("/user/cart/{email}")
-    public ResponseEntity<Integer> getCartCount(@PathVariable String email) {
-        int count = usageService.countByCartEmail(email);
-        return ResponseEntity.ok(count);
-    }
-
-    @PostMapping("/user/cart")
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 23 jan 2025
+    // Function : Add Product To Cart
+    // Add Product To Cart User Give Token and Detils of product it will add to cart
+    ///////////////////////////////////////////
+    @PostMapping("/addToCart")
     public ResponseEntity<?> addToCart(
-            @RequestParam String email,
+            @RequestHeader("Authorization") String token, // Get the token from the request header
             @RequestBody wishlist request) {
         try {
 
+            // Extract the username from the token
+            String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
+                                                                                       // token
+
             // Check if the product already exists in the wishlist for the given email
-            boolean exists = cartrepo.existsByEmailAndProductname(email, request.getProductname());
+            boolean exists = cartrepo.existsByUsernameAndProductname(usernameFromToken, request.getProductname());
             if (exists) {
                 return ResponseEntity.badRequest().body("Product already exists in the cart!");
             }
 
             // Create and populate a Wishlist object
             Cart cart = new Cart();
-            cart.setEmail(email);
+            cart.setUsername(usernameFromToken);
             cart.setProductname(request.getProductname());
             cart.setProductcompanyname(request.getProductcompanyname());
             cart.setProductimage(request.getProductimage());
@@ -363,7 +278,7 @@ public class userController {
         } catch (RuntimeException e) {
             // Handle case where email was not found
             System.err.println("Error: " + e.getMessage());
-            return ResponseEntity.badRequest().body("Login please | Email Id Not Found");
+            return ResponseEntity.badRequest().body("Login please | username Id Not Found");
 
         } catch (Exception e) {
             // Handle other general exceptions
@@ -372,12 +287,20 @@ public class userController {
         }
     }
 
-    // get all value from database from /user/GetAllData
-    @GetMapping("/user/ViewAllcart")
-    public ResponseEntity<?> getAllCart(@RequestParam String email) {
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 23 jan 2025
+    // Function : View All Cart Products
+    // Give Token and get All product
+    ///////////////////////////////////////////
+    @GetMapping("/viewAllCart")
+    public ResponseEntity<?> getAllCart(@RequestHeader("Authorization") String token) {
         try {
+            // Extract the username from the token
+            String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
+
             // Fetch wishlists by email
-            List<Cart> carts = cartrepo.findByEmail(email);
+            List<Cart> carts = cartrepo.findByUsername(usernameFromToken);
 
             if (carts.isEmpty()) {
                 // Return a 404 response if no data is found
@@ -393,8 +316,119 @@ public class userController {
         }
     }
 
-    // Delete wishlist details by ID
-    @DeleteMapping("/user/DeleteWishList/{id}")
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 23 jan 2025
+    // Function : Delete Cart Product by id
+    // Give id and delete that id product
+    ///////////////////////////////////////////
+    @DeleteMapping("/user/deleteCart/{id}")
+    public ResponseEntity<?> deleteCartById(@PathVariable Long id) {
+        try {
+            // Check if the wishlist exists
+            Cart cart = cartrepo.findById(id)
+                    .orElseThrow(() -> new RuntimeException("cart not found with ID: " + id));
+
+            // Delete the wishlist item
+            cartrepo.delete(cart);
+
+            // Return success response
+            return ResponseEntity.ok(new messageHelper(true, "cart item deleted successfully with ID: " + id));
+        } catch (RuntimeException e) {
+            // Handle specific exception when wishlist item is not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new messageHelper(false, e.getMessage()));
+        } catch (Exception e) {
+            // Handle generic exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new messageHelper(false, "An error occurred: " + e.getMessage()));
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 23 jan 2025
+    // Function : Add Product To Wishlist
+    // Add Product To Wishlist User Give Token and Detils of product it will add to
+    /////////////////////////////////////////// 
+    @PostMapping("/addToWishlist")
+    public ResponseEntity<?> addToWishlist(
+            @RequestHeader("Authorization") String token, // Get the token from the request header
+            @RequestBody wishlist request) {
+        try {
+            // Extract the username from the token
+            String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
+
+            // Check if the product already exists in the wishlist for the given email
+            boolean exists = wishlistrepo.existsByUsernameAndProductname(usernameFromToken, request.getProductname());
+            if (exists) {
+                return ResponseEntity.badRequest().body("Product already exists in the wishlist!");
+            }
+
+            // Create and populate a Wishlist object
+            wishlist wishlist = new wishlist();
+            wishlist.setUsername(usernameFromToken);
+            wishlist.setProductname(request.getProductname());
+            wishlist.setProductcompanyname(request.getProductcompanyname());
+            wishlist.setProductimage(request.getProductimage());
+            wishlist.setBeforediscount(request.getBeforediscount());
+            wishlist.setAfterdiscount(request.getAfterdiscount());
+            wishlist.setDiscount(request.getDiscount());
+
+            // Save to the wishlist repository
+            wishlistrepo.save(wishlist);
+
+            // Return success response
+            return ResponseEntity.ok("Product added to wishlist successfully!");
+
+        } catch (RuntimeException e) {
+            // Handle case where email was not found
+            System.err.println("Error: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Login please | username Id Not Found");
+
+        } catch (Exception e) {
+            // Handle other general exceptions
+            System.err.println("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 23 jan 2025
+    // Function : View All Wishlist Products
+    // Give Token and get All product
+    ///////////////////////////////////////////
+    @GetMapping("/viewAllWishlist")
+    public ResponseEntity<?> getAllWishlists(@RequestHeader("Authorization") String token) {
+        try {
+            // Extract the username from the token
+            String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
+
+            // Fetch wishlists by email
+            List<wishlist> wishlists = wishlistrepo.findByUsername(usernameFromToken);
+
+            if (wishlists.isEmpty()) {
+                // Return a 404 response if no data is found
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No wishlist found for this email.");
+            }
+
+            // Return the list of wishlists
+            return ResponseEntity.ok(wishlists);
+        } catch (Exception e) {
+            // Handle any errors
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while fetching wishlists.");
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 23 jan 2025
+    // Function : Delete Wishlist Product by id
+    // Give id and delete that id product
+    ///////////////////////////////////////////
+    @DeleteMapping("/user/deleteWishlist/{id}")
     public ResponseEntity<?> deleteWishlistById(@PathVariable Integer id) {
         try {
             // Check if the wishlist exists
@@ -417,27 +451,70 @@ public class userController {
         }
     }
 
-    // Delete wishlist details by ID
-    @DeleteMapping("/user/DeleteCart/{id}")
-    public ResponseEntity<?> deleteCartById(@PathVariable Long id) {
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 25 jan 2025
+    // Function : Total number of user repeated
+    // give token and it will return the number of repetation
+    ///////////////////////////////////////////
+    @GetMapping("/user/wishlistCount")
+    public ResponseEntity<Integer> getUserCount(@RequestHeader("Authorization") String token) {
+
+        // Extract the username from the token
+        String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
+
+        int count = usageService.countByWishlistUsername(usernameFromToken);
+        return ResponseEntity.ok(count);
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 25 jan 2025
+    // Function : Total number of user repeated
+    // give token and it will return the number of repetation
+    ///////////////////////////////////////////
+    @GetMapping("/user/cartCount")
+    public ResponseEntity<Integer> getCartCount(@RequestHeader("Authorization") String token) {
+        
+        // Extract the username from the token
+        String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
+
+        int count = usageService.countByCartUsername(usernameFromToken);
+        return ResponseEntity.ok(count);
+    }
+
+
+
+
+
+
+    // get all value from database from /user/GetAllData
+    @GetMapping("/user/GetAllData")
+    List<user> getAllUsers() {
+        return userrepo.findAll();
+    }
+
+    @PostMapping("/user/mail")
+    public ResponseEntity<?> profileCheck(@RequestParam String email) {
         try {
-            // Check if the wishlist exists
-            Cart cart = cartrepo.findById(id)
-                    .orElseThrow(() -> new RuntimeException("cart not found with ID: " + id));
+            // Retrieve the user by email
+            user user = userrepo.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Email Id Not Found"));
 
-            // Delete the wishlist item
-            cartrepo.delete(cart);
+            System.out.println(user);
 
-            // Return success response
-            return ResponseEntity.ok(new messageHelper(true, "cart item deleted successfully with ID: " + id));
+            // If user exists, return success message
+            return ResponseEntity.ok("success");
+
         } catch (RuntimeException e) {
-            // Handle specific exception when wishlist item is not found
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new messageHelper(false, e.getMessage()));
+            // Handle case where email was not found
+            System.err.println("Authentication failed: " + e.getMessage());
+            return ResponseEntity.badRequest().body("login please | Email Id Not Found");
+
         } catch (Exception e) {
-            // Handle generic exceptions
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new messageHelper(false, "An error occurred: " + e.getMessage()));
+            // Handle other general exceptions
+            System.err.println("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
         }
     }
 

@@ -16,10 +16,10 @@ public class UsageService {
         this.cartrepo = cartrepo;
     }
 
-    public int countByEmail(String email) {
-        return wishlistrepo.countByEmail(email);
+    public int countByWishlistUsername(String token) {
+        return wishlistrepo.countByUsername(token);
     }
-    public int countByCartEmail(String email) {
-        return cartrepo.countByEmail(email);
+    public int countByCartUsername(String token) {
+        return cartrepo.countByUsername(token);
     }
 }

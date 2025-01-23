@@ -14,7 +14,7 @@ public class wishlist {
     private Long id;
 
     private String productname;
-    private String email;
+    private String username;
     private String productcompanyname;
     private String productimage;
     private int discount;
@@ -37,12 +37,12 @@ public class wishlist {
     public void setProductname(String productname) {
         this.productname = productname;
     }
-    public String getEmail() {
-        return email;
+    public String getUsername() {
+        return username;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getProductcompanyname() {
