@@ -4,8 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 @Entity
 public class pesticide {
@@ -17,14 +15,20 @@ public class pesticide {
     private String productname;
     private String productcompanyname;
     private String productimage;
+    private String producttype;
     private int discount;
     private int beforediscount;
     private int afterdiscount;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id") // Specify the foreign key column if needed
-    private user user;  // Correctly defining the user relationship
 
+
+    public String getProducttype() {
+        return producttype;
+    }
+
+    public void setProducttype(String producttype) {
+        this.producttype = producttype;
+    }
     // Getters and setters
     public Long getId() {
         return id;
@@ -80,13 +84,5 @@ public class pesticide {
 
     public void setAfterdiscount(int afterdiscount) {
         this.afterdiscount = afterdiscount;
-    }
-
-    public user getUser() {
-        return user;
-    }
-
-    public void setUser(user user) {
-        this.user = user;
     }
 }

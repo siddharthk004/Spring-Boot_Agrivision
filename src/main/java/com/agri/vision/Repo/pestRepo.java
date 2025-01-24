@@ -17,7 +17,6 @@ public interface pestRepo extends JpaRepository<pesticide, Long> {
 
     Optional<pesticide> findById(Integer id);
     
-
     List<pesticide> findByProductnameContainingIgnoreCase(String query);
 
 }

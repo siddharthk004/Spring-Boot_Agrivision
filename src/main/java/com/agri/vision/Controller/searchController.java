@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.agri.vision.Model.pesticide;
 import com.agri.vision.Repo.pestRepo;
 
-
 @Controller
 @RestController
 @CrossOrigin(origins = "/**") // this url is react only this will be accept here
@@ -23,11 +22,10 @@ public class searchController {
 
     @Autowired
     private pestRepo pestrepo;
-    
+
     // search Handler
-    @GetMapping("/search/{query}")
-    public ResponseEntity<?> search(@PathVariable("query") String query)
-    {
+    @GetMapping("/user/search/{query}")
+    public ResponseEntity<?> search(@PathVariable("query") String query) {
         List<pesticide> pest = this.pestrepo.findByProductnameContainingIgnoreCase(query);
         return ResponseEntity.ok(pest);
     }
