@@ -12,7 +12,10 @@ import com.agri.vision.Model.user;
 @Repository
 public interface userRepo extends JpaRepository<user,Long> {
 
-    user findByUsername(String username);
+    static user findByUsername(String username) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findByUsername'");
+    }
 
     @Query("select u from user u where u.username = :username")
     public user getUserByUserName(@Param("username") String username);

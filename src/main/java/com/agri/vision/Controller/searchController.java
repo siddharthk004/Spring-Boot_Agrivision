@@ -23,7 +23,12 @@ public class searchController {
     @Autowired
     private pestRepo pestrepo;
 
-    // search Handler
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Friday 24 jan 2025
+    // Function : Search Query Dyanmically
+    // give any query and also any case it will send the data to user
+    ///////////////////////////////////////////
     @GetMapping("/user/search/{query}")
     public ResponseEntity<?> search(@PathVariable("query") String query) {
         List<pesticide> pest = this.pestrepo.findByProductnameContainingIgnoreCase(query);

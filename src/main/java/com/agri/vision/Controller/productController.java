@@ -47,7 +47,7 @@ public class productController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 23 jan 2025
+    // day , Date : Thursday 23 jan 2025
     // Function : Add Product To Cart
     // Add Product To Cart User Give Token and Detils of product it will add to cart
     ///////////////////////////////////////////
@@ -97,7 +97,7 @@ public class productController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 23 jan 2025
+    // day , Date : Thursday 23 jan 2025
     // Function : View All Cart Products
     // Give Token and get All product
     ///////////////////////////////////////////
@@ -126,7 +126,7 @@ public class productController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 23 jan 2025
+    // day , Date : Thursday 23 jan 2025
     // Function : Delete Cart Product by id
     // Give id and delete that id product
     ///////////////////////////////////////////
@@ -155,7 +155,7 @@ public class productController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 23 jan 2025
+    // day , Date : Thursday 23 jan 2025
     // Function : Add Product To Wishlist
     // Add Product To Wishlist User Give Token and Detils of product it will add to
     ///////////////////////////////////////////
@@ -203,7 +203,7 @@ public class productController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 23 jan 2025
+    // day , Date : Thursday 23 jan 2025
     // Function : View All Wishlist Products
     // Give Token and get All product
     ///////////////////////////////////////////
@@ -232,7 +232,7 @@ public class productController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 23 jan 2025
+    // day , Date : Thursday 23 jan 2025
     // Function : Delete Wishlist Product by id
     // Give id and delete that id product
     ///////////////////////////////////////////
@@ -261,7 +261,7 @@ public class productController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 24 jan 2025
+    // day , Date : friday 24 jan 2025
     // Function : Total number of user repeated
     // give token and it will return the number of repetation
     ///////////////////////////////////////////
@@ -277,7 +277,7 @@ public class productController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 24 jan 2025
+    // day , Date : friday 24 jan 2025
     // Function : Total number of user repeated
     // give token and it will return the number of repetation
     ///////////////////////////////////////////
@@ -292,36 +292,5 @@ public class productController {
     }
 
     
-
-    // // get all value from database from /user/GetAllData
-    // @GetMapping("/user/GetAllData")
-    // List<user> getAllUsers() {
-    // return userrepo.findAll();
-    // }
-
-    // @PostMapping("/user/mail")
-    // public ResponseEntity<?> profileCheck(@RequestParam String email) {
-    // try {
-    // // Retrieve the user by email
-    // user user = userrepo.findByEmail(email)
-    // .orElseThrow(() -> new RuntimeException("Email Id Not Found"));
-
-    // System.out.println(user);
-
-    // // If user exists, return success message
-    // return ResponseEntity.ok("success");
-
-    // } catch (RuntimeException e) {
-    // // Handle case where email was not found
-    // System.err.println("Authentication failed: " + e.getMessage());
-    // return ResponseEntity.badRequest().body("login please | Email Id Not Found");
-
-    // } catch (Exception e) {
-    // // Handle other general exceptions
-    // System.err.println("Error: " + e.getMessage());
-    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error
-    // occurred");
-    // }
-    // }
 
 }

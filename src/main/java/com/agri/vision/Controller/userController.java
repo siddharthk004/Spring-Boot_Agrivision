@@ -90,7 +90,7 @@ public class userController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 14 jan 2025
+    // day , Date : Thursday 14 jan 2025
     // Function : Login User
     // take usename and password and return the email username and token
     ///////////////////////////////////////////
@@ -98,7 +98,7 @@ public class userController {
     public ResponseEntity<?> signin(@RequestBody LoginReq loginRequest) {
         try {
             // Retrieve the user by username
-            user user = userrepo.findByUsername(loginRequest.getUsername());
+            user user = userRepo.findByUsername(loginRequest.getUsername());
 
             // Compare the provided plain password with the hashed password
             if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
@@ -138,7 +138,7 @@ public class userController {
         System.out.println(authentication);
 
         // Fetch the user from the database
-        user user = userrepo.findByUsername(username);
+        user user = userRepo.findByUsername(username);
 
         // If the user is not found, handle it appropriately
         if (user == null) {
@@ -179,7 +179,7 @@ public class userController {
         String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in token
 
         // Find the existing user by username (from the token)
-        user existingUser = userrepo.findByUsername(usernameFromToken);
+        user existingUser = userRepo.findByUsername(usernameFromToken);
         if (existingUser == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
