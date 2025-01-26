@@ -1,5 +1,6 @@
 package com.agri.vision.Controller;
 
+import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -61,6 +64,14 @@ public class userController {
     ///////////////////////////////////////////
     @PostMapping("/user/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegistrationRequest request) {
+        // Check if usernameis null
+        if (request.getUsername() == null) {
+            return ResponseEntity.badRequest().body("Username is Must!");
+        }
+        // Check if email is null
+        if (request.getEmail() == null) {
+            return ResponseEntity.badRequest().body("Email is Must!");
+        }
         // Check if username already exists
         if (userrepo.existsByUsername(request.getUsername())) {
             return ResponseEntity.badRequest().body("Username is already taken!");
@@ -210,10 +221,48 @@ public class userController {
         response.put("contact", existingUser.getContact());
         response.put("occupation", existingUser.getOccupation());
         response.put("profileImage",
-                existingUser.getProfileImage() != null ? "Profile image updated" : "No profile image");
+        existingUser.getProfileImage() != null ? "Profile image updated" : "No profile image");
 
         return ResponseEntity.ok(response); // Return updated details
     }
 
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 24 jan 2025
+    // Function : edit Profile picture Of USer
+    // give token and Profile Picture that we want to update and return success
+    ///////////////////////////////////////////
+    @PostMapping("/editProfilePic")
+    public ResponseEntity<?> editProfilePic(
+            @RequestHeader("Authorization") String token,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
     
+        // Extract the username from the token
+        String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in token
+    
+        // Find the existing user by username (from the token)
+        user existingUser = userRepo.findByUsername(usernameFromToken);
+        if (existingUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+    
+        // Check if an image is provided
+        if (image == null || image.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No image file provided");
+        }
+    
+        try {
+            // Update the profile image
+            existingUser.setProfileImage(image.getBytes());
+            userrepo.save(existingUser);
+    
+            return ResponseEntity.ok("Profile picture updated successfully");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error saving image: " + e.getMessage());
+        }
+    }
+
+
+
 }
