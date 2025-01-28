@@ -27,6 +27,9 @@ public class serviceController {
     private JwtService jwtService;
 
     @Autowired
+    private userRepo userrepo;
+
+    @Autowired
     public servRepo servrepo;
 
     ///////////////////////////////////////////
@@ -46,7 +49,7 @@ public class serviceController {
             String usernameFromToken = jwtService.extractUsername(token.substring(7));
 
             // Find the existing user by username
-            user existingUser = userRepo.findByUsername(usernameFromToken);
+            user existingUser = userrepo.findByUsername(usernameFromToken);
             if (existingUser == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }

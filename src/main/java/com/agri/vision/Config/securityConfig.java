@@ -2,7 +2,6 @@ package com.agri.vision.Config;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,7 +29,6 @@ public class securityConfig {
     private final myAppUserService appUserService;
     private final JwtFilter jwtFilter;
 
-    @Autowired
     public securityConfig(myAppUserService appUserService, JwtFilter jwtFilter) {
         this.appUserService = appUserService;
         this.jwtFilter = jwtFilter;
