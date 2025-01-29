@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.agri.vision.Model.pesticide;
-import com.agri.vision.Repo.pestRepo;
+import com.agri.vision.Model.product;
+import com.agri.vision.Repo.productRepo;
 
 @Controller
 @RestController
@@ -21,7 +21,7 @@ import com.agri.vision.Repo.pestRepo;
 public class searchController {
 
     @Autowired
-    private pestRepo pestrepo;
+    private productRepo productrepo;
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
@@ -31,7 +31,7 @@ public class searchController {
     ///////////////////////////////////////////
     @GetMapping("/user/search/{query}")
     public ResponseEntity<?> search(@PathVariable("query") String query) {
-        List<pesticide> pest = this.pestrepo.findByProductnameContainingIgnoreCase(query);
+        List<product> pest = this.productrepo.findByProductnameContainingIgnoreCase(query);
         return ResponseEntity.ok(pest);
     }
 }

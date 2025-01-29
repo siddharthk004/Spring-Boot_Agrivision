@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import com.agri.vision.Service.UsageService;
+import com.agri.vision.Service.productService;
 import com.agri.vision.helper.messageHelper;
 import com.agri.vision.Model.wishlist;
 import com.agri.vision.Model.Cart;
+import com.agri.vision.Model.product;
 import com.agri.vision.Repo.wishlistRepo;
 
 import java.util.List;
@@ -291,6 +293,44 @@ public class productController {
         return ResponseEntity.ok(count);
     }
 
-    
 
+
+
+
+    /////////////////////////////////////////////////////////////
+    // Name : Sakshi Ladkat
+    // day , Date :Tuesday 29 jan 2025
+    // Function : product Api 
+    // view all product , product by id , product by category 
+    ////////////////////////////////////////////////////////////
+
+  @Autowired
+  private productService service;
+  
+
+@PostMapping("/user/product")
+	public ResponseEntity<List<product>> getAllProduct()
+	{
+		return new ResponseEntity<>(service.getAllProduct(), HttpStatus.OK);
+	}
+    
+	@PostMapping("/user/product/id/{id}")
+	public ResponseEntity<product> getProductById(@PathVariable("id") int id)
+	{
+		product product = service.getProductById(id);
+		if(product !=null)
+		{
+			return new ResponseEntity<>(service.getProductById(id),HttpStatus.OK);
+		}
+		else
+		{
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@PostMapping("/user/product/category/{category}")
+	public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) 
+	{
+	       return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
+	}
 }

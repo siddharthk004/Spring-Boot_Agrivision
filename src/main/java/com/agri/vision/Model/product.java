@@ -6,7 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class pesticide {
+public class product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,74 +15,86 @@ public class pesticide {
     private String productname;
     private String productcompanyname;
     private String productimage;
-    private String producttype;
+    private String category;
     private int discount;
     private int beforediscount;
     private int afterdiscount;
 
-
-
-    public String getProducttype() {
-        return producttype;
+    //Default constructor 
+    public product() {
     }
 
-    public void setProducttype(String producttype) {
-        this.producttype = producttype;
-    }
-    // Getters and setters
+    
+    //Getters and setters 
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
-
     public String getProductname() {
         return productname;
     }
-
     public void setProductname(String productname) {
         this.productname = productname;
     }
-
     public String getProductcompanyname() {
         return productcompanyname;
     }
-
     public void setProductcompanyname(String productcompanyname) {
         this.productcompanyname = productcompanyname;
     }
-
     public String getProductimage() {
         return productimage;
     }
-
     public void setProductimage(String productimage) {
         this.productimage = productimage;
     }
-
+    public String getCategory() {
+        return category;
+    }
+    public void setCategory(String category) {
+        this.category = category;
+    }
     public int getDiscount() {
         return discount;
     }
-
     public void setDiscount(int discount) {
         this.discount = discount;
     }
-
     public int getBeforediscount() {
         return beforediscount;
     }
-
     public void setBeforediscount(int beforediscount) {
         this.beforediscount = beforediscount;
     }
-
     public int getAfterdiscount() {
         return afterdiscount;
     }
-
     public void setAfterdiscount(int afterdiscount) {
         this.afterdiscount = afterdiscount;
     }
+    
+    //Constructor 
+    public product(Long id, String productname, String productcompanyname, String productimage, String category,
+            int discount, int beforediscount, int afterdiscount) {
+        this.id = id;
+        this.productname = productname;
+        this.productcompanyname = productcompanyname;
+        this.productimage = productimage;
+        this.category = category;
+        this.discount = discount;
+        this.beforediscount = beforediscount;
+        this.afterdiscount = afterdiscount;
+    }
+
+    //To-string Method 
+    @Override
+    public String toString() {
+        return "product [id=" + id + ", productname=" + productname + ", productcompanyname=" + productcompanyname
+                + ", productimage=" + productimage + ", category=" + category + ", discount=" + discount
+                + ", beforediscount=" + beforediscount + ", afterdiscount=" + afterdiscount + "]";
+    }
+
+
 }
