@@ -40,8 +40,7 @@ public class serviceController {
     // Name : Siddharth Kardile
     // day , Date : friday 24 jan 2025
     // Function : save user report
-    // -give token and message and it will return the Success and confirm message
-    /////////////////////////////////////////// and
+    // -give token and message and it will return the Success and confirm message and
     // also it will save the user email and name and desc together
     ///////////////////////////////////////////
     @PostMapping("/user/serviceMsgSend")
@@ -93,7 +92,7 @@ public class serviceController {
             String usernameFromToken = jwtService.extractUsername(token.substring(7));
 
             // Find the existing user by username
-            user existingUser = userrepo.findByUsername(usernameFromToken);
+            service existingUser = servrepo.findByUsername(usernameFromToken);
             if (existingUser == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
@@ -101,7 +100,8 @@ public class serviceController {
             String Subject = "Agrivision Query Resolve";
 
             boolean success = emailService.sendEmail(userEmail, Subject, message);
-            if (success) {
+            if (success) {                
+                servrepo.deleteById(existingUser.getId());    
                 return ResponseEntity.ok("success");
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while sending mail");

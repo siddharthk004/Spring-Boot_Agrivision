@@ -9,4 +9,6 @@ import com.agri.vision.Model.service;
 @Repository
 public interface servRepo extends JpaRepository<service, Long> {
     Optional<service> findById(Integer id);
+
+    service findByUsername(String usernameFromToken);
 }
