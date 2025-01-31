@@ -24,7 +24,7 @@ public interface userRepo extends JpaRepository<user,Long> {
     @Query("SELECT u.email FROM user u WHERE u.username = :username")
     String getEmailByUsername(@Param("username") String username);
 
-    user existsByUsername(String usernameFromToken);
+    boolean existsByUsername(String usernameFromToken);
 
     Long getOtpByUsername(String usernameFromToken);
 

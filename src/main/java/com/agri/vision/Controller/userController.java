@@ -92,7 +92,7 @@ public class userController {
             return ResponseEntity.badRequest().body("Email is Must!");
         }
         // Check if username already exists
-        if (userrepo.existsByUsername(request.getUsername()) != null) {
+        if (userrepo.existsByUsername(request.getUsername())) {
             return ResponseEntity.badRequest().body("Username is already taken!");
         }
         // Check if email already exists
@@ -260,7 +260,7 @@ public class userController {
         String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in token
 
         // Find the existing user by username (from the token)
-        user existingUser = userrepo.existsByUsername(usernameFromToken);
+        user existingUser = userrepo.findByUsername(usernameFromToken);
         if (existingUser == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }

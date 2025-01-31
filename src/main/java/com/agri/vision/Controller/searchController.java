@@ -8,6 +8,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,4 +37,13 @@ public class searchController {
         List<product> pest = this.productrepo.findByProductnameContainingIgnoreCase(query);
         return ResponseEntity.ok(pest);
     }
+
+    // ///////////////////////////////////////////
+    // // Name : Siddharth Kardile
+    // // day , Date : Friday 31 jan 2025  
+    // // Function : Get Product By Category
+    // // give any category and it will send the data to user
+    // ///////////////////////////////////////////
+    // @PostMapping("/user/comment")
+    // public ResponseEntity<?> commentAdd(@RequestHeader("Authorization") String token,@RequestBody )
 }
