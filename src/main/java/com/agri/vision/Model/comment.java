@@ -13,19 +13,35 @@ public class comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long Uid;
+    private String Uname;
     private Long Pid;
     private int star;
     private String commentText;
 
     @Lob
-    @Column(name = "image", columnDefinition = "BLOB")
+    @Column(name = "image", columnDefinition = "LONGBLOB")
     private byte[] image;
 
-    
     @Lob
     @Column(name = "video", columnDefinition = "LONGBLOB")
     private byte[] video;
+
+    // Getters and Setters
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public byte[] getVideo() {
+        return video;
+    }
+
+    public void setVideo(byte[] video) {
+        this.video = video;
+    }
 
     public int getStar() {
         return star;
@@ -33,14 +49,6 @@ public class comment {
 
     public void setStar(int star) {
         this.star = star;
-    }
-
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
     }
 
     public Long getId() {
@@ -59,12 +67,12 @@ public class comment {
         Pid = pid;
     }
 
-    public Long getUid() {
-        return Uid;
+    public String getUname() {
+        return Uname;
     }
 
-    public void setUid(Long uid) {
-        Uid = uid;
+    public void setUname(String Uname) {
+        this.Uname = Uname;
     }
 
     public String getCommentText() {
@@ -74,14 +82,5 @@ public class comment {
     public void setCommentText(String commentText) {
         this.commentText = commentText;
     }
-
-    public byte[] getVideo() {
-        return video;
-    }
-
-    public void setVideo(byte[] video) {
-        this.video = video;
-    }
-    
 
 }

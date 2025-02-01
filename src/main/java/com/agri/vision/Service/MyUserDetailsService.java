@@ -20,6 +20,7 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
     private userRepo userrepo;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         logger.debug("Fetching user by username: " + username);
