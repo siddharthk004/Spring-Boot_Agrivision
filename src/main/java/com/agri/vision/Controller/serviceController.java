@@ -1,10 +1,13 @@
 package com.agri.vision.Controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -76,6 +79,18 @@ public class serviceController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
+
+    
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Monday 3 Feb 2025
+    // Function : View All Service List
+    ///////////////////////////////////////////
+    @GetMapping("/admin/ViewHelpCenterList")
+    public List<service> getAllService() {
+        return servrepo.findAll();  // repository should be a JpaRepository
+    }
+    
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
