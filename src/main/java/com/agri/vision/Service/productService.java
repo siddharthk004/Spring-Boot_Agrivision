@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import com.agri.vision.Model.product;
 import com.agri.vision.Repo.productRepo;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class productService
 {
@@ -26,5 +28,36 @@ public class productService
 	public List<product> getProductByCategory(String category)
 	{
 		return repo.findByCategory(category);
+	}
+
+	
+	@Transactional
+	public product addproduct(product product)
+	{
+		return repo.save(product);
+	}
+    
+	
+	@Transactional
+    public product updateproduct(int id, product product) {
+		
+        product existingProduct =repo.findById(id).get();
+        
+        existingProduct.setProductname(product.getProductname());
+        existingProduct.setAfterdiscount(product.getAfterdiscount());
+        existingProduct.setBeforediscount(product.getBeforediscount());
+        existingProduct.setCategory(product.getCategory());
+        existingProduct.setProductimage(product.getProductimage());
+        existingProduct.setDiscount(product.getDiscount());
+        existingProduct.setProductcompanyname(product.getProductcompanyname());
+        
+        return repo.save(existingProduct);
+    }
+	
+
+	@Transactional
+	public void deleteProduct(int id) 
+	{
+	 repo.deleteById((long) id);	
 	}
 }
