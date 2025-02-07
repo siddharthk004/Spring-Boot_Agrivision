@@ -1,11 +1,9 @@
 package com.agri.vision.Model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 
 @Entity
 public class comment {
@@ -17,30 +15,24 @@ public class comment {
     private Long Pid;
     private int star;
     private String commentText;
-
-    @Lob
-    @Column(name = "image", columnDefinition = "LONGBLOB")
-    private byte[] image;
-
-    @Lob
-    @Column(name = "video", columnDefinition = "LONGBLOB")
-    private byte[] video;
+    private String image;
+    private String video;
 
     // Getters and Setters
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
-    public byte[] getVideo() {
+    public String getVideo() {
         return video;
     }
 
-    public void setVideo(byte[] video) {
-        this.video = video;
+    public void setVideo(String fileUrl) {
+        this.video = fileUrl;
     }
 
     public int getStar() {

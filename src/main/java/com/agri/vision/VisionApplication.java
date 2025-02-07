@@ -8,5 +8,5 @@ public class VisionApplication {
 	public static void main(String[] args) { 
 		SpringApplication.run(VisionApplication.class, args);
 	}
-
+	
 }

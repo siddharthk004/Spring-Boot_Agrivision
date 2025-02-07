@@ -23,6 +23,7 @@ import com.agri.vision.Model.user;
 import com.agri.vision.Repo.commentRepo;
 import com.agri.vision.Repo.productRepo;
 import com.agri.vision.Repo.userRepo;
+import com.agri.vision.Service.CloudinaryService;
 import com.agri.vision.Service.JwtService;
 
 @Controller
@@ -30,6 +31,12 @@ import com.agri.vision.Service.JwtService;
 @CrossOrigin(origins = "/**") // this url is react only this will be accept here
 @RequestMapping("/api/v1/auth") // base url http://localhost:8080/ onwards
 public class searchController {
+
+    private final CloudinaryService cloudinaryService;
+
+    public searchController(CloudinaryService cloudinaryService) {
+        this.cloudinaryService = cloudinaryService;
+    }
 
     @Autowired
     private productRepo productrepo;
@@ -51,7 +58,7 @@ public class searchController {
     ///////////////////////////////////////////
     @GetMapping("/user/search/{query}")
     public ResponseEntity<?> search(@PathVariable("query") String query) {
-        List<product> pd = this.productrepo.findByProductnameContainingIgnoreCase(query);
+        List<product> pd = this.productrepo.findByproductnameContainingIgnoreCase(query);
         return ResponseEntity.ok(pd);
     }
 
@@ -59,16 +66,16 @@ public class searchController {
     // Name : Siddharth Kardile
     // day , Date : Friday 31 jan 2025
     // Function : Add comment into Database
-    // get id and details of user comment and add tit into database
+    // get id and details of user comment and add this into database
     ///////////////////////////////////////////
     @PostMapping(value = "/user/comment", consumes = "multipart/form-data")
     public ResponseEntity<?> commentAdd(
             @RequestHeader("Authorization") String token,
             @RequestParam("pid") Long pid,
-            @RequestParam(value = "star", required = false,defaultValue = "0") int star,
+            @RequestParam(value = "star", required = false, defaultValue = "0") int star,
             @RequestParam(value = "message", required = false) String message,
             @RequestParam(value = "image", required = false) MultipartFile image,
-            @RequestParam(value = "video", required = false) MultipartFile video) {
+            @RequestParam(value = "video", required = false) MultipartFile video) throws IOException {
         try {
             // Extract username from token
             String usernameFromToken = jwtService.extractUsername(token.substring(7));
@@ -92,15 +99,28 @@ public class searchController {
                 cm.setPid(pid);
                 cm.setUname(UID);
 
-                // Store image as byte[]
                 if (image != null && !image.isEmpty()) {
-                    cm.setImage(image.getBytes());
+                    System.out.println("Image Content Type: " + image.getContentType());
+                    if (!image.getContentType().startsWith("image/")) {
+                        return ResponseEntity.badRequest().body("Invalid image file format.");
+                    }
+                    String fileUrl = cloudinaryService.uploadFile(image);
+                    if (fileUrl == null || fileUrl.isEmpty()) {
+                        return ResponseEntity.badRequest().body("Image upload failed.");
+                    }
+                    cm.setImage(fileUrl);
                 }
 
-                // Store video as byte[]
                 if (video != null && !video.isEmpty()) {
-                    System.out.println("Video Size: " + video.getSize() + " bytes");
-                    cm.setVideo(video.getBytes());
+                    System.out.println("Video Content Type: " + video.getContentType());
+                    if (!video.getContentType().startsWith("video/")) {
+                        return ResponseEntity.badRequest().body("Invalid video file format.");
+                    }
+                    String fileUrl = cloudinaryService.uploadFile(video);
+                    if (fileUrl == null || fileUrl.isEmpty()) {
+                        return ResponseEntity.badRequest().body("Video upload failed.");
+                    }
+                    cm.setVideo(fileUrl);
                 }
 
                 commentrepo.save(cm);
@@ -108,8 +128,6 @@ public class searchController {
             } else {
                 return ResponseEntity.badRequest().body("Product not found.");
             }
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body("File processing error: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid Request: " + e.getMessage());
         }
@@ -127,4 +145,5 @@ public class searchController {
         return ResponseEntity.ok(comment);
     }
 
+    
 }

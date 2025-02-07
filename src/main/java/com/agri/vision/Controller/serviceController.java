@@ -88,7 +88,7 @@ public class serviceController {
     ///////////////////////////////////////////
     @GetMapping("/admin/ViewHelpCenterList")
     public List<service> getAllService() {
-        return servrepo.findAll();  // repository should be a JpaRepository
+        return servrepo.findAll();  
     }
     
 
@@ -126,4 +126,7 @@ public class serviceController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
+
+    // Other methods for user authentication and other functionalities can be added here...
+
 }

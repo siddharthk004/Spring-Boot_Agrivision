@@ -6,9 +6,10 @@ public class CommentRequest {
     private int star;
     private String message;
     private byte[] image; // Add this field for the image
-    private byte[] video; // Add this field for the video
+    private String video; // Add this field for the video
     
-    public Long getPid() {
+    public Long getPid() 
+    {
         return Pid;
     }
     public void setPid(Long pid) {
@@ -32,10 +33,10 @@ public class CommentRequest {
     public void setImage(byte[] image) {
         this.image = image;
     }
-    public byte[] getVideo() {
+    public String getVideo() {
         return video;
     }
-    public void setVideo(byte[] video) {
+    public void setVideo(String video) {
         this.video = video;
     }
 }
