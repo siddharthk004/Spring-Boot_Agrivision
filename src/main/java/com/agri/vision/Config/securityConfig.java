@@ -65,7 +65,7 @@ public class securityConfig {
                 })
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/user/**","/api/v1/auth/admin/**", "/api/v1/auth/user/login", "/api/v1/auth/user/register")
+                .requestMatchers("/api/v1/auth/user/**","/api/v1/auth/admin/**", "/api/v1/auth/user/login","/pdf/generate-order","/api/v1/auth/user/register")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()

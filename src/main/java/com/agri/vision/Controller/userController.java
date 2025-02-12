@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,14 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.agri.vision.DTO.UserRegistrationRequest;
 import com.agri.vision.Model.LoginReq;
-import com.agri.vision.Model.userotp;
 import com.agri.vision.Model.user;
+import com.agri.vision.Model.userotp;
 import com.agri.vision.Repo.userOtpRepo;
 import com.agri.vision.Repo.userRepo;
 import com.agri.vision.Service.EmailService;
@@ -247,7 +247,7 @@ public class userController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date :Tuesday  24 jan 2025
+    // day , Date :Tuesday 24 jan 2025
     // Function : edit Profile picture Of USer
     // give token and Profile Picture that we want to update and return success
     ///////////////////////////////////////////
@@ -281,7 +281,7 @@ public class userController {
                     .body("Error saving image: " + e.getMessage());
         }
     }
- 
+
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
     // day , Date : Wednesday 28 jan 2025
@@ -306,9 +306,9 @@ public class userController {
             System.out.println("otp " + otp);
 
             String subject = "AgriVision OTP - Email";
-            String message = "Your OTP is: "+otp;
+            String message = "Your OTP is: " + otp;
 
-            boolean success = emailService.sendEmail(email, subject ,message);
+            boolean success = emailService.sendEmail(email, subject, message);
             if (success) {
                 // Find the existing user by username (from the token)
                 userotp existingUser = userotprepo.findByUsername(usernameFromToken);
@@ -337,7 +337,7 @@ public class userController {
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
     // day , Date : Wednesday 28 jan 2025
-    // Function : get otp and cheak it is correct  ?
+    // Function : get otp and cheak it is correct ?
     ///////////////////////////////////////////
     @PostMapping("/user/forgotPassword/OTP")
     public ResponseEntity<?> forgotPasswordValidateOtp(@RequestHeader("Authorization") String token,
@@ -348,12 +348,12 @@ public class userController {
 
             // Fetch the email using the username
             Long DBotp = userrepo.getOtpByUsername(usernameFromToken);
-            
+
             userotp existingUser = userotprepo.findByUsername(usernameFromToken);
-            
+
             if (DBotp == userotp) {
                 // delete that id row from database
-                userotprepo.deleteById(existingUser.getId());                
+                userotprepo.deleteById(existingUser.getId());
                 return ResponseEntity.ok(true);
             } else {
                 return ResponseEntity.ok(false);
@@ -363,7 +363,7 @@ public class userController {
                     .body("An error occurred: " + e.getMessage());
         }
     }
-    
+
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
     // day , Date : Thursday 29 jan 2025
@@ -376,12 +376,12 @@ public class userController {
         try {
             // Extract the username from the token (assuming "Bearer " prefix)
             String usernameFromToken = jwtService.extractUsername(token.substring(7));
-            
+
             // Find the user password for update by username (from the token)
             user user = userrepo.getUserByUserName(usernameFromToken);
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-            } 
+            }
 
             // Update the user password
             user.setPassword(passwordEncoder.encode(password));

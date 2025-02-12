@@ -145,5 +145,4 @@ public class searchController {
         return ResponseEntity.ok(comment);
     }
 
-    
 }

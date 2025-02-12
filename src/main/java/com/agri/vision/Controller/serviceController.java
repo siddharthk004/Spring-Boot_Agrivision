@@ -43,7 +43,8 @@ public class serviceController {
     // Name : Siddharth Kardile
     // day , Date : friday 24 jan 2025
     // Function : save user report
-    // -give token and message and it will return the Success and confirm message and
+    // -give token and message and it will return the Success and confirm message
+    /////////////////////////////////////////// and
     // also it will save the user email and name and desc together
     ///////////////////////////////////////////
     @PostMapping("/user/serviceMsgSend")
@@ -80,7 +81,6 @@ public class serviceController {
         }
     }
 
-    
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
     // day , Date : Monday 3 Feb 2025
@@ -88,35 +88,25 @@ public class serviceController {
     ///////////////////////////////////////////
     @GetMapping("/admin/ViewHelpCenterList")
     public List<service> getAllService() {
-        return servrepo.findAll();  
+        return servrepo.findAll();
     }
-    
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : thursday 30 jan 2025
-    // Function : user report send Via mail 
+    // day , Date : thursday 7 feb 2025
+    // Function : user report send Via mail by admin
     ///////////////////////////////////////////
-    @PostMapping("/user/serviceMailSend")
+    @PostMapping("/admin/serviceMailSend")
     public ResponseEntity<String> serviceMail(
-            @RequestHeader("Authorization") String token, // Get the token from the request header
-            @RequestBody String message) { // Accept message in JSON format
+            @RequestBody String mail,
+            @RequestBody String message) {
 
         try {
-            // Extract the username from the token (assuming "Bearer " prefix in the token)
-            String usernameFromToken = jwtService.extractUsername(token.substring(7));
-
-            // Find the existing user by username
-            service existingUser = servrepo.findByUsername(usernameFromToken);
-            if (existingUser == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-            }
-            String userEmail = existingUser.getEmail();
             String Subject = "Agrivision Query Resolve";
 
-            boolean success = emailService.sendEmail(userEmail, Subject, message);
-            if (success) {                
-                servrepo.deleteById(existingUser.getId());    
+            boolean success = emailService.sendEmail(mail, Subject, message);
+            if (success) {
+                // servrepo.deleteById(existingUser.getId());
                 return ResponseEntity.ok("success");
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while sending mail");
@@ -126,7 +116,5 @@ public class serviceController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
-
-    // Other methods for user authentication and other functionalities can be added here...
 
 }
