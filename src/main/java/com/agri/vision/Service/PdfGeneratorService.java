@@ -5,9 +5,11 @@ import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.itextpdf.io.source.ByteArrayOutputStream;
+import com.agri.vision.Model.Pdf;
+import com.agri.vision.Repo.PdfRepo;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
@@ -23,9 +25,18 @@ import com.itextpdf.layout.properties.UnitValue;
 @Service
 public class PdfGeneratorService {
 
+    private final CloudinaryService cloudinaryService;
+
+    @Autowired
+    private PdfRepo pdfrepo;
+
     private static final String PDF_DIRECTORY = "C:/GeneratedPdfs/";
 
-    public String generateOrderPdf(Map<String, String> orderInfo, Map<String, String> customerInfo,
+    public PdfGeneratorService(CloudinaryService cloudinaryService) {
+        this.cloudinaryService = cloudinaryService;
+    }
+
+    public String generateOrderPdf(Long UID, Map<String, String> orderInfo, Map<String, String> customerInfo,
             List<Map<String, String>> items) {
         try {
             // Ensure directory exists
@@ -35,11 +46,11 @@ public class PdfGeneratorService {
             }
 
             String filePath = PDF_DIRECTORY + "customer_order_" + System.currentTimeMillis() + ".pdf";
+            File pdfFile = new File(filePath);
 
-            try (FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            try (FileOutputStream fileOutputStream = new FileOutputStream(pdfFile)) {
 
-                PdfWriter writer = new PdfWriter(outputStream);
+                PdfWriter writer = new PdfWriter(fileOutputStream);
                 PdfDocument pdfDocument = new PdfDocument(writer);
                 Document document = new Document(pdfDocument);
 
@@ -53,7 +64,7 @@ public class PdfGeneratorService {
                 document.add(new Paragraph("+12 123 456 789 | info@agrivision.net")
                         .setFontSize(10)
                         .setTextAlignment(TextAlignment.LEFT));
-                document.add(new Paragraph("Sppu Campus, Issc Dept, pune-123456")
+                document.add(new Paragraph("Sppu Campus, Issc Dept, Pune-123456")
                         .setFontSize(10)
                         .setTextAlignment(TextAlignment.LEFT));
                 document.add(new Paragraph(
@@ -62,9 +73,10 @@ public class PdfGeneratorService {
                 document.add(new Paragraph("\nCUSTOMER ORDER FORM")
                         .setFontSize(14)
                         .setTextAlignment(TextAlignment.CENTER));
+
                 // Define colors
                 Color headerColor = new DeviceRgb(173, 216, 230); // Light Blue Background
-                Color textColor = ColorConstants.BLACK; // Dark Black Text
+                Color textColor = ColorConstants.BLACK; // Black Text
 
                 // Order Info and Customer Info Table
                 Table infoTable = new Table(2);
@@ -100,12 +112,12 @@ public class PdfGeneratorService {
                 itemTable.addCell(new Cell().add(new Paragraph("PRICE").setFontColor(textColor))
                         .setBackgroundColor(headerColor));
 
-                // Add Items (Example Data)
+                // Add Items
                 for (Map<String, String> item : items) {
-                    itemTable.addCell(new Cell().add(new Paragraph(item.get("name"))).setFontColor(textColor));
-                    itemTable.addCell(new Cell().add(new Paragraph(item.get("unitPrice"))).setFontColor(textColor));
-                    itemTable.addCell(new Cell().add(new Paragraph(item.get("quantity"))).setFontColor(textColor));
-                    itemTable.addCell(new Cell().add(new Paragraph(item.get("price"))).setFontColor(textColor));
+                    itemTable.addCell(new Cell().add(new Paragraph(item.get("name"))));
+                    itemTable.addCell(new Cell().add(new Paragraph(item.get("unitPrice"))));
+                    itemTable.addCell(new Cell().add(new Paragraph(item.get("quantity"))));
+                    itemTable.addCell(new Cell().add(new Paragraph(item.get("price"))));
                 }
 
                 // Add the table to the document
@@ -142,10 +154,20 @@ public class PdfGeneratorService {
 
                 document.close();
 
-                // Save the file
-                fileOutputStream.write(outputStream.toByteArray());
+                // Upload the file to Cloudinary
+                String fileUrl = cloudinaryService.uploadPdf(pdfFile);
 
-                return "PDF successfully saved at: " + filePath;
+                if (fileUrl == null || fileUrl.isEmpty()) {
+                    throw new RuntimeException("PDF upload to Cloudinary failed.");
+                }
+
+                // Save PDF details in the database
+                Pdf pf = new Pdf();
+                pf.setUserid(UID);
+                pf.setPdfurl(fileUrl);
+                pdfrepo.save(pf);
+
+                return "PDF successfully generated and saved.";
             }
         } catch (Exception e) {
             throw new RuntimeException("Error generating PDF", e);

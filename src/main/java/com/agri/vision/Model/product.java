@@ -18,6 +18,7 @@ public class product {
     private String category;
     private int discount;
     private int beforediscount;
+    private int quantity;
     private int afterdiscount;
 
     //Default constructor 
@@ -94,6 +95,16 @@ public class product {
         return "product [id=" + id + ", productname=" + productname + ", productcompanyname=" + productcompanyname
                 + ", productimage=" + productimage + ", category=" + category + ", discount=" + discount
                 + ", beforediscount=" + beforediscount + ", afterdiscount=" + afterdiscount + "]";
+    }
+
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
 

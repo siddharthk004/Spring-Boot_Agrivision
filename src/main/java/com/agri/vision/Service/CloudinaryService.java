@@ -1,14 +1,16 @@
 package com.agri.vision.Service;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
 @Service
 public class CloudinaryService {
@@ -24,20 +26,18 @@ public class CloudinaryService {
         ));
     }
 
+    // Upload images and videos
     public String uploadFile(MultipartFile file) {
         try {
-            // Validate file
             if (file == null || file.isEmpty()) {
                 throw new IOException("File is empty or null.");
             }
 
-            // Validate content type
             String contentType = file.getContentType();
             if (contentType == null) {
                 throw new IOException("File has no content type.");
             }
 
-            // Determine resource type
             String resourceType;
             if (contentType.startsWith("image/")) {
                 resourceType = "image";
@@ -47,29 +47,47 @@ public class CloudinaryService {
                 throw new IOException("Unsupported file type: " + contentType);
             }
 
-            // Generate timestamp
-            long timestamp = System.currentTimeMillis() / 1000; // Convert to seconds
-            
-            // Generate signature
+            long timestamp = System.currentTimeMillis() / 1000;
             String signatureString = "timestamp=" + timestamp + API_SECRET;
             String signature = DigestUtils.sha1Hex(signatureString);
 
-            // Upload parameters
             Map<String, Object> uploadParams = new HashMap<>();
             uploadParams.put("timestamp", timestamp);
             uploadParams.put("signature", signature);
             uploadParams.put("api_key", "745913769633583");
-            uploadParams.put("resource_type", resourceType); // Set correct type
+            uploadParams.put("resource_type", resourceType);
 
-            // Upload file
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
-            
-            // Extract and return the URL
-            String uploadedUrl = (String) uploadResult.get("url");
-            System.out.println("Uploaded File URL: " + uploadedUrl);
-            return uploadedUrl;
+
+            return (String) uploadResult.get("url");
         } catch (Exception e) {
             System.out.println("Cloudinary Upload Error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // New Method: Upload PDF
+    public String uploadPdf(File pdfFile) {
+        try {
+            if (pdfFile == null || !pdfFile.exists()) {
+                throw new IOException("PDF file does not exist.");
+            }
+
+            long timestamp = System.currentTimeMillis() / 1000;
+            String signatureString = "timestamp=" + timestamp + API_SECRET;
+            String signature = DigestUtils.sha1Hex(signatureString);
+
+            Map<String, Object> uploadParams = new HashMap<>();
+            uploadParams.put("timestamp", timestamp);
+            uploadParams.put("signature", signature);
+            uploadParams.put("api_key", "745913769633583");
+            uploadParams.put("resource_type", "raw"); // PDFs are stored as "raw" files
+
+            Map uploadResult = cloudinary.uploader().upload(pdfFile, uploadParams);
+
+            return (String) uploadResult.get("url");
+        } catch (Exception e) {
+            System.out.println("PDF Upload Error: " + e.getMessage());
             return null;
         }
     }

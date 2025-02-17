@@ -8,12 +8,12 @@ import org.springframework.stereotype.Repository;
 
 import com.agri.vision.Model.user;
 
-
 @Repository
 @EnableJpaRepositories
 public interface userRepo extends JpaRepository<user,Long> {
 
     user findByUsername(String username);
+    // user findById(String username);
 
     @Query("select u from user u where u.username = :username")
     public user getUserByUserName(@Param("username") String username);
