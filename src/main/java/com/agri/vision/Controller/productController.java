@@ -335,49 +335,4 @@ public class productController {
 	       return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
 	}
 
-  /////////////////////////////////////////////////////////////
-    // Name : Sakshi Ladkat
-    // day , Date :Tuesday 4 feb 2025
-    // Function : product Api 
-    // add product , update product , delete product 
-    ////////////////////////////////////////////////////////////
-
-
-
-    @PostMapping("admin/addproduct")
-	public ResponseEntity<product> addproduct(@RequestBody product product)
-	{   
-		return new ResponseEntity<>(service.addproduct(product),HttpStatus.OK);
-		
-	}
-
-	@PutMapping("/admin/updateproduct/{id}")
-	public ResponseEntity<product> updateProduct(@PathVariable("id") int id,@RequestBody product product ) 
-	{
-		return new ResponseEntity<product>(service.updateproduct(id,product),HttpStatus.OK);
-	}
-	
-	
-	@DeleteMapping("/admin/deleteproduct/{id}")
-		public ResponseEntity<String> deleteProduct(@PathVariable("id") int id)
-		{
-		product product =service.getProductById(id);
-		if (product !=null)
-		{
-		service.deleteProduct(id);
-		return new ResponseEntity<>("Deleted",HttpStatus.OK);
-		}
-		else
-		{
-			return new ResponseEntity<>("Product Not Found",HttpStatus.NOT_FOUND);
-		}
-        }
-	
-
-
-
-
-
-
-
 }
