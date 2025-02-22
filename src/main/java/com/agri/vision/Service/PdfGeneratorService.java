@@ -29,6 +29,9 @@ public class PdfGeneratorService {
 
     @Autowired
     private PdfRepo pdfrepo;
+    
+    @Autowired
+    private EmailService emailService;
 
     private static final String PDF_DIRECTORY = "C:/GeneratedPdfs/";
 
@@ -37,7 +40,7 @@ public class PdfGeneratorService {
     }
 
     public String generateOrderPdf(Long UID, Map<String, String> orderInfo, Map<String, String> customerInfo,
-            List<Map<String, String>> items) {
+            List<Map<String, String>> items,String mailID) {
         try {
             // Ensure directory exists
             File directory = new File(PDF_DIRECTORY);
@@ -166,6 +169,11 @@ public class PdfGeneratorService {
                 pf.setUserid(UID);
                 pf.setPdfurl(fileUrl);
                 pdfrepo.save(pf);
+                
+                String subject = "AgriVision OTP - Order PDF";
+                String message = "Your Order Details in the pdf format..";
+
+                boolean success = emailService.sendEmailWithAttachment(mailID, subject, message, pdfFile);
 
                 return "PDF successfully generated and saved.";
             }
