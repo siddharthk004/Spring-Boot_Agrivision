@@ -38,6 +38,13 @@ public class PdfController {
     @Autowired
     private userRepo userrepo;
 
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Thursday 20 Feb 2025
+    // Function : Generate Order
+    // give token And Data To Generate Order Pdf
+    ///////////////////////////////////////////
     @PostMapping("/generate-order")
     public ResponseEntity<String> generateOrderPdf(
             @RequestHeader("Authorization") String token,
@@ -68,6 +75,13 @@ public class PdfController {
         }
     }
 
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Saturday 22 Feb 2025
+    // Function : Download PDF
+    // give token And  download the order pdf 
+    ///////////////////////////////////////////
     @GetMapping("/Download-Pdf")
     public ResponseEntity<List<Pdf>> downloadPdf(@RequestHeader("Authorization") String token) {
         try {
