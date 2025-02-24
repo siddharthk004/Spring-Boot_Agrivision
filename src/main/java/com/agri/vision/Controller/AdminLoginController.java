@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.agri.vision.DTO.AdminRequest;
 import com.agri.vision.Model.Admin;
 import com.agri.vision.Model.product;
@@ -36,7 +37,7 @@ public class AdminLoginController {
     // Name : Sakshi Ladkat
     // day , Date :Wednsday 19 feb 2025
     // Function : Admin Login
-    // Admin login credentials are username = admin password=admin@123
+    // Admin login credentials are username=Admin password=admin@123
     // if Admin Table is Empty it will create Admin with Above credentials
     ////////////////////////////////////////////////////////////
     @PostMapping("admin/login")
