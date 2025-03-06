@@ -1,27 +1,36 @@
 package com.agri.vision.Controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.agri.vision.DTO.AdminRequest;
 import com.agri.vision.Model.Admin;
 import com.agri.vision.Model.product;
 import com.agri.vision.Repo.AdminRepo;
+import com.agri.vision.Repo.productRepo;
 import com.agri.vision.Service.AdminService;
 import com.agri.vision.Service.productService;
+import com.cloudinary.Cloudinary;
 
+@Controller
 @RestController
 @CrossOrigin(origins = "/**")
 @RequestMapping("/api/v1/auth")
-public class AdminLoginController {
+public class AdminController {
 
     @Autowired
     private AdminService adminService;
@@ -31,6 +40,12 @@ public class AdminLoginController {
 
     @Autowired
     private productService service;
+
+    @Autowired
+    private productRepo repo;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     /////////////////////////////////////////////////////////////
     // Name : Sakshi Ladkat
@@ -63,24 +78,46 @@ public class AdminLoginController {
     ////////////////////////////////////////////////////////////
 
     @PostMapping("/admin/addproduct")
-    public ResponseEntity<product> addproduct(@RequestBody product product) {
-        return new ResponseEntity<>(service.addproduct(product), HttpStatus.OK);
-
+    public ResponseEntity<?> addProduct(
+            @RequestParam("productname") String productname,
+            @RequestParam("productcompanyname") String productcompanyname,
+            @RequestParam("productimage") MultipartFile productimage,
+            @RequestParam("category") String category,
+            @RequestParam("discount") int discount,
+            @RequestParam("beforediscount") int beforediscount,
+            @RequestParam("afterdiscount") int afterdiscount,
+            @RequestParam("quantity") int quantity) {
+        try {
+            product newProduct = service.addProduct(
+                    productname,
+                    productcompanyname,
+                    productimage,
+                    category,
+                    discount,
+                    beforediscount,
+                    afterdiscount,
+                    quantity);
+            return ResponseEntity.ok(newProduct);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to update product: " + e.getMessage());
+        }
     }
 
-    @PutMapping("/admin/updateproduct/{id}")
-    public ResponseEntity<product> updateProduct(@PathVariable("id") int id, @RequestBody product product) {
-        return new ResponseEntity<product>(service.updateproduct(id, product), HttpStatus.OK);
-    }
+    @PatchMapping("/admin/updateproduct/{id}")
+    public ResponseEntity<?> updateProductFields(
+            @PathVariable Long id,
+            @RequestParam(value = "productimage", required = false) MultipartFile productimage,
+            @RequestParam Map<String, String> updates) {
+        try {
+            Map<String, Object> updateMap = new HashMap<>(updates);
+            if (productimage != null) {
+                updateMap.put("productimage", productimage);
+            }
 
-    @DeleteMapping("/admin/deleteproduct/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable("id") int id) {
-        product product = service.getProductById(id);
-        if (product != null) {
-            service.deleteProduct(id);
-            return new ResponseEntity<>("Deleted", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Product Not Found", HttpStatus.NOT_FOUND);
+            product updatedProduct = service.updateProduct(id, updateMap);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to update product: " + e.getMessage());
         }
     }
 
