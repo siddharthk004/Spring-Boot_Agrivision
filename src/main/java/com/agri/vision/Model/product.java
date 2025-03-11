@@ -20,12 +20,28 @@ public class product {
     private int beforediscount;
     private int quantity;
     private int afterdiscount;
+    private String Status;
 
     // Default constructor
     public product() {
     }
 
-    // Getters and setters
+    // Parameterized constructor
+    public product(String productname, String productcompanyname, String productimage, String category,
+            Integer discount,
+            Integer beforediscount, Integer afterdiscount, Integer quantity, String status) {
+        this.productname = productname;
+        this.productcompanyname = productcompanyname;
+        this.productimage = productimage;
+        this.category = category;
+        this.discount = discount;
+        this.beforediscount = beforediscount;
+        this.afterdiscount = afterdiscount;
+        this.quantity = quantity;
+        this.Status = status;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -66,64 +82,43 @@ public class product {
         this.category = category;
     }
 
-    public int getDiscount() {
+    public Integer getDiscount() {
         return discount;
     }
 
-    public void setDiscount(int discount) {
+    public void setDiscount(Integer discount) {
         this.discount = discount;
     }
 
-    public int getBeforediscount() {
+    public Integer getBeforediscount() {
         return beforediscount;
     }
 
-    public void setBeforediscount(int beforediscount) {
+    public void setBeforediscount(Integer beforediscount) {
         this.beforediscount = beforediscount;
     }
 
-    public int getAfterdiscount() {
+    public Integer getAfterdiscount() {
         return afterdiscount;
     }
 
-    public void setAfterdiscount(int afterdiscount) {
+    public void setAfterdiscount(Integer afterdiscount) {
         this.afterdiscount = afterdiscount;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
-    // Constructor
-    public product(Long id, String productname, String productcompanyname, String productimage, String category,
-            int discount, int beforediscount, int afterdiscount, int quantity) {
-        this.id = id;
-        this.productname = productname;
-        this.productcompanyname = productcompanyname;
-        this.productimage = productimage;
-        this.category = category;
-        this.discount = discount;
-        this.beforediscount = beforediscount;
-        this.afterdiscount = afterdiscount;
-        this.quantity = quantity;
+    public String getStatus() {
+        return Status;
     }
 
-    // to-string
-    @Override
-    public String toString() {
-        return "product [id=" + id + ", productname=" + productname + ", productcompanyname=" + productcompanyname
-                + ", productimage=" + productimage + ", category=" + category + ", discount=" + discount
-                + ", beforediscount=" + beforediscount + ", afterdiscount=" + afterdiscount + ", quantity=" + quantity
-                + ", getId()=" + getId() + ", getProductname()=" + getProductname()
-                + ", getProductcompanyname()=" + getProductcompanyname() + ", getProductimage()=" + getProductimage()
-                + ", getCategory()=" + getCategory() + ", getClass()=" + getClass() + ", getDiscount()=" + getDiscount()
-                + ", getBeforediscount()=" + getBeforediscount() + ", getAfterdiscount()=" + getAfterdiscount()
-                + ", getQuantity()=" + getQuantity() + ", hashCode()="
-                + hashCode() + ", toString()=" + super.toString() + "]";
+    public void setStatus(String status) {
+        this.Status = status;
     }
-
 }
