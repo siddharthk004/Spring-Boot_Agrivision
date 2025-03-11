@@ -18,13 +18,6 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    /**
-     * Sends an email with the specified OTP to the recipient.
-     *
-     * @param to  the recipient email address
-     * @param otp the OTP to include in the email
-     * @return true if the email was sent successfully, false otherwise
-     */
     public boolean sendEmail(String to, String subject, String message) {
         try {
             SimpleMailMessage mailMessage = new SimpleMailMessage();

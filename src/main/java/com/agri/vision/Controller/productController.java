@@ -314,4 +314,6 @@ public class productController {
 	       return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
 	}
 
+    
+
 }

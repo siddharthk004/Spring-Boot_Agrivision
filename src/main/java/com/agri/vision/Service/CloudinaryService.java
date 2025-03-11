@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,13 +17,22 @@ import com.cloudinary.utils.ObjectUtils;
 public class CloudinaryService {
 
     private final Cloudinary cloudinary;
-    private static final String API_SECRET = "C1fHGogH55jLynulVH9QtIua9O8"; // Ensure this is correct!
+
+    // Fetching values from application.properties
+    @Value("${cloudinary.cloud_name}")
+    private String cloudName;
+
+    @Value("${cloudinary.api_key}")
+    private String apiKey;
+
+    @Value("${cloudinary.api_secret}")
+    private String apiSecret;
 
     public CloudinaryService() {
         this.cloudinary = new Cloudinary(ObjectUtils.asMap(
-            "cloud_name", "dmejw3uwe",
-            "api_key", "745913769633583",
-            "api_secret", API_SECRET
+            "cloud_name", cloudName,
+            "api_key", apiKey,
+            "api_secret", apiSecret
         ));
     }
 
@@ -48,13 +58,13 @@ public class CloudinaryService {
             }
 
             long timestamp = System.currentTimeMillis() / 1000;
-            String signatureString = "timestamp=" + timestamp + API_SECRET;
+            String signatureString = "timestamp=" + timestamp + apiSecret;
             String signature = DigestUtils.sha1Hex(signatureString);
 
             Map<String, Object> uploadParams = new HashMap<>();
             uploadParams.put("timestamp", timestamp);
             uploadParams.put("signature", signature);
-            uploadParams.put("api_key", "745913769633583");
+            uploadParams.put("api_key", apiKey);
             uploadParams.put("resource_type", resourceType);
 
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
@@ -74,13 +84,13 @@ public class CloudinaryService {
             }
 
             long timestamp = System.currentTimeMillis() / 1000;
-            String signatureString = "timestamp=" + timestamp + API_SECRET;
+            String signatureString = "timestamp=" + timestamp + apiSecret;
             String signature = DigestUtils.sha1Hex(signatureString);
 
             Map<String, Object> uploadParams = new HashMap<>();
             uploadParams.put("timestamp", timestamp);
             uploadParams.put("signature", signature);
-            uploadParams.put("api_key", "745913769633583");
+            uploadParams.put("api_key", apiKey);
             uploadParams.put("resource_type", "raw"); // PDFs are stored as "raw" files
 
             Map uploadResult = cloudinary.uploader().upload(pdfFile, uploadParams);
