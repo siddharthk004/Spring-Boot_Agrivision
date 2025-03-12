@@ -23,12 +23,12 @@ import com.agri.vision.Service.JwtService;
 
 @Controller
 @RestController
-@CrossOrigin(origins = "/**") // this url is react only this will be accept here
+@CrossOrigin(origins = "/**",allowedHeaders = "*") // this url is react only this will be accept here
 @RequestMapping("/api/v1/auth") // base url http://localhost:8080/ onwards
 public class serviceController {
 
     @Autowired
-    private JwtService jwtService;
+    private JwtService jwtService; 
 
     @Autowired
     private EmailService emailService;
