@@ -98,7 +98,7 @@ public class serviceController {
     ///////////////////////////////////////////
     @PostMapping("/admin/serviceMailSend")
     public ResponseEntity<String> serviceMail(
-            @RequestBody String mail,
+            @RequestHeader String mail,
             @RequestBody String message) {
 
         try {
