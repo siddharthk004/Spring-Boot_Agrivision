@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.agri.vision.DTO.MailRequest;
 import com.agri.vision.Model.service;
 import com.agri.vision.Model.user;
 import com.agri.vision.Repo.servRepo;
@@ -97,24 +98,21 @@ public class serviceController {
     // Function : user report send Via mail by admin
     ///////////////////////////////////////////
     @PostMapping("/admin/serviceMailSend")
-    public ResponseEntity<String> serviceMail(
-            @RequestHeader("mail") String mail,
-            @RequestBody String message) {
-
+    public ResponseEntity<String> serviceMail(@RequestBody MailRequest request) {
         try {
-            String Subject = "Agrivision Query Resolve";
-
-            boolean success = emailService.sendEmail(mail, Subject, message);
+            String mail = request.getMail();
+            String message = request.getMessage();
+            String subject = "Agrivision Query Resolve";
+    
+            boolean success = emailService.sendEmail(mail, subject, message);
             if (success) {
-                // servrepo.deleteById(existingUser.getId());
-                return ResponseEntity.ok("success");
+                return ResponseEntity.ok("Success: Mail sent to " + mail);
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while sending mail");
-
         } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-    }
+    }   
 
 }
