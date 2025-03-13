@@ -106,6 +106,8 @@ public class serviceController {
     
             boolean success = emailService.sendEmail(mail, subject, message);
             if (success) {
+                // Delete the user report from the database
+                servrepo.deleteById(request.getId());
                 return ResponseEntity.ok("Success: Mail sent to " + mail);
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while sending mail");
