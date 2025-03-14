@@ -34,7 +34,7 @@ import com.cloudinary.Cloudinary;
 
 @Controller
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "/**")
 @RequestMapping("/api/v1/auth")
 public class AdminController {
     private final CloudinaryService cloudinaryService;
