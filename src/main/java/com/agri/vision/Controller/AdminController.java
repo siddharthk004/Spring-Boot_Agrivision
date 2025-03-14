@@ -3,6 +3,7 @@ package com.agri.vision.Controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -133,11 +134,31 @@ public class AdminController {
         }
     }
 
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Monday 11 Mar 2025
+    // Function : Admin View All Add
+    ////////////////////////////////////////////////////////////
     @GetMapping("/admin/add")
     public List<AddManage> getAllAdd() {
         return Addrepo.findAll();
     }
 
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 12 Mar 2025
+    // Function : Admin View Add By id
+    ////////////////////////////////////////////////////////////
+    @GetMapping("/admin/add/{id}")
+    public Optional<AddManage> getAddByID(@PathVariable Long id) {
+        return Addrepo.findById(id);
+    }
+
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Wednesday 13 Mar 2025
+    // Function : Admin Delete Add By id
+    ////////////////////////////////////////////////////////////
     @PostMapping("/admin/Deleteadd/{id}")
     public ResponseEntity<String> Deleteadd(@PathVariable Long id) {
         try {
@@ -148,6 +169,11 @@ public class AdminController {
         }
     }
 
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Friday 14 Mar 2025
+    // Function : Admin Update Add By ID
+    ////////////////////////////////////////////////////////////
     @PostMapping("/admin/Updateadd/{id}")
     public ResponseEntity<String> updateImage(@PathVariable Long id,
             @RequestPart(value = "image", required = false) MultipartFile image) {
@@ -180,6 +206,13 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update image.");
         }
     }
+
+    
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Friday 14 Mar 2025
+    // Function : Admin Add New Add
+    ////////////////////////////////////////////////////////////
     @PostMapping("/admin/addImage")
     public ResponseEntity<String> addImage(@RequestPart("image") MultipartFile image) {
         try {
