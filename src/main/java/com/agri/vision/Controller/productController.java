@@ -292,17 +292,34 @@ public class productController {
     // view all product , product by id , product by category
     ////////////////////////////////////////////////////////////
 
-    @Autowired
-    private productService service;
+  @Autowired
+  private productService service;
+  
 
-    @PostMapping("/user/product")
-    public ResponseEntity<List<product>> getAllProduct() {
-        return new ResponseEntity<>(service.getAllProduct(), HttpStatus.OK);
-    }
+@PostMapping("/user/product")
+	public ResponseEntity<List<product>> getAllProduct()
+	{
+		return new ResponseEntity<>(service.getAllProduct(), HttpStatus.OK);
+	}
+    
+	@PostMapping("/user/product/id/{id}")
+	public ResponseEntity<product> getProductById(@PathVariable("id") int id)
+	{
+		product product = service.getProductById(id);
+		if(product !=null)
+		{
+			return new ResponseEntity<>(service.getProductById(id),HttpStatus.OK);
+		}
+		else
+		{
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
 
-    @PostMapping("/user/product/category/{category}")
-    public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) {
-        return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
-    }
+	@PostMapping("/user/product/category/{category}")
+	public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) 
+	{
+	       return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
+	}
 
 }
