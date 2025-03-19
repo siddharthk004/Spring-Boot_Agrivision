@@ -1,6 +1,9 @@
 package com.agri.vision.Controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,11 +23,14 @@ import com.agri.vision.Model.Cart;
 import com.agri.vision.Model.product;
 import com.agri.vision.Model.wishlist;
 import com.agri.vision.Repo.CartRepo;
+import com.agri.vision.Repo.productRepo;
 import com.agri.vision.Repo.wishlistRepo;
 import com.agri.vision.Service.JwtService;
 import com.agri.vision.Service.UsageService;
 import com.agri.vision.Service.productService;
 import com.agri.vision.helper.messageHelper;
+
+import jakarta.transaction.Transactional;
 
 @Controller
 @RestController
@@ -43,6 +49,8 @@ public class productController {
 
     @Autowired
     private wishlistRepo wishlistrepo;
+    @Autowired
+    private productRepo productRepo;
 
     @Autowired
     private CartRepo cartrepo;
@@ -55,43 +63,40 @@ public class productController {
     ///////////////////////////////////////////
     @PostMapping("/addToCart")
     public ResponseEntity<?> addToCart(
-            @RequestHeader("Authorization") String token, // Get the token from the request header
-            @RequestBody wishlist request) {
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, Long> request) { // Expecting only productId in request body
         try {
-
             // Extract the username from the token
             String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
                                                                                        // token
 
-            // Check if the product already exists in the wishlist for the given email
-            boolean exists = cartrepo.existsByUsernameAndProductname(usernameFromToken, request.getProductname());
+            // Extract productId from request
+            Long productId = request.get("productId");
+            if (productId == null) {
+                return ResponseEntity.badRequest().body("Product ID is required!");
+            }
+
+            // Check if the product already exists in the cart for the given user
+            boolean exists = cartrepo.existsByUsernameAndProductId(usernameFromToken, productId);
             if (exists) {
                 return ResponseEntity.badRequest().body("Product already exists in the cart!");
             }
 
-            // Create and populate a Wishlist object
+            // Create and populate a Cart object with only productId
             Cart cart = new Cart();
             cart.setUsername(usernameFromToken);
-            cart.setProductname(request.getProductname());
-            cart.setProductcompanyname(request.getProductcompanyname());
-            cart.setProductimage(request.getProductimage());
-            cart.setBeforediscount(request.getBeforediscount());
-            cart.setAfterdiscount(request.getAfterdiscount());
-            cart.setDiscount(request.getDiscount());
+            cart.setProductId(productId); // Storing only the product ID
 
-            // Save to the wishlist repository
+            // Save to the cart repository
             cartrepo.save(cart);
 
             // Return success response
             return ResponseEntity.ok("Product added to cart successfully!");
 
         } catch (RuntimeException e) {
-            // Handle case where email was not found
             System.err.println("Error: " + e.getMessage());
-            return ResponseEntity.badRequest().body("Login please | username Id Not Found");
-
+            return ResponseEntity.badRequest().body("Login please | Username ID not found");
         } catch (Exception e) {
-            // Handle other general exceptions
             System.err.println("Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
         }
@@ -107,22 +112,25 @@ public class productController {
     public ResponseEntity<?> getAllCart(@RequestHeader("Authorization") String token) {
         try {
             // Extract the username from the token
-            String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
+            String usernameFromToken = jwtService.extractUsername(token.substring(7));
 
-            // Fetch wishlists by email
+            // Fetch cart items by username
             List<Cart> carts = cartrepo.findByUsername(usernameFromToken);
 
             if (carts.isEmpty()) {
-                // Return a 404 response if no data is found
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No cart found for this email.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No cart found for this user.");
             }
 
-            // Return the list of wishlists
-            return ResponseEntity.ok(carts);
+            // Fetch product details for each productId in the cart
+            List<product> cartProducts = carts.stream()
+                    .map(cart -> productRepo.findById(cart.getProductId()).orElse(null))
+                    .filter(Objects::nonNull) // Remove any null results
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(cartProducts);
         } catch (Exception e) {
-            // Handle any errors
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while fetching cart.");
+                    .body("An error occurred while fetching the cart.");
         }
     }
 
@@ -161,72 +169,62 @@ public class productController {
     // Function : Add Product To Wishlist
     // Add Product To Wishlist User Give Token and Detils of product it will add to
     ///////////////////////////////////////////
-    @PostMapping("/addToWishlist")
+    @PostMapping("/wishlist/add")
     public ResponseEntity<?> addToWishlist(
-            @RequestHeader("Authorization") String token, // Get the token from the request header
-            @RequestBody wishlist request) {
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, Long> request) {
         try {
-            // Extract the username from the token
-            String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
+            String username = jwtService.extractUsername(token.substring(7));
+            Long productId = request.get("productId");
 
-            // Check if the product already exists in the wishlist for the given email
-            boolean exists = wishlistrepo.existsByUsernameAndProductname(usernameFromToken, request.getProductname());
-            if (exists) {
+            if (productId == null) {
+                return ResponseEntity.badRequest().body("Product ID is required!");
+            }
+
+            // Check if product already exists in wishlist
+            if (wishlistrepo.existsByUsernameAndProductId(username, productId)) {
                 return ResponseEntity.badRequest().body("Product already exists in the wishlist!");
             }
 
-            // Create and populate a Wishlist object
-            wishlist wishlist = new wishlist();
-            wishlist.setUsername(usernameFromToken);
-            wishlist.setProductname(request.getProductname());
-            wishlist.setProductcompanyname(request.getProductcompanyname());
-            wishlist.setProductimage(request.getProductimage());
-            wishlist.setBeforediscount(request.getBeforediscount());
-            wishlist.setAfterdiscount(request.getAfterdiscount());
-            wishlist.setDiscount(request.getDiscount());
+            // Add product to wishlist
+            wishlist wish = new wishlist();
+            wish.setUsername(username);
+            wish.setProductId(productId);
+            wishlistrepo.save(wish);
 
-            // Save to the wishlist repository
-            wishlistrepo.save(wishlist);
-
-            // Return success response
             return ResponseEntity.ok("Product added to wishlist successfully!");
-
-        } catch (RuntimeException e) {
-            // Handle case where email was not found
-            System.err.println("Error: " + e.getMessage());
-            return ResponseEntity.badRequest().body("Login please | username Id Not Found");
-
         } catch (Exception e) {
-            // Handle other general exceptions
-            System.err.println("Error: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + e.getMessage());
         }
     }
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Thursday 23 jan 2025
+    // Date : Thursday, 23 Jan 2025
     // Function : View All Wishlist Products
-    // Give Token and get All product
+    // Input: Token
     ///////////////////////////////////////////
-    @GetMapping("/viewAllWishlist")
-    public ResponseEntity<?> getAllWishlists(@RequestHeader("Authorization") String token) {
+    @GetMapping("/wishlist/view")
+    public ResponseEntity<?> getAllWishlistItems(@RequestHeader("Authorization") String token) {
         try {
-            // Extract the username from the token
-            String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
+            String username = jwtService.extractUsername(token.substring(7));
 
-            // Fetch wishlists by email
-            List<wishlist> wishlists = wishlistrepo.findByUsername(usernameFromToken);
+            // Fetch wishlist items by username
+            List<wishlist> wishlists = wishlistrepo.findByUsername(username);
 
             if (wishlists.isEmpty()) {
-                // Return a 404 response if no data is found
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No wishlist found for this email.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No wishlist found for this user.");
             }
 
-            // Return the list of wishlists
-            return ResponseEntity.ok(wishlists);
+            // Fetch full product details for each wishlist item
+            List<product> wishlistProducts = wishlists.stream()
+                    .map(w -> productRepo.findById(w.getProductId()).orElse(null))
+                    .filter(Objects::nonNull) // Remove null values
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(wishlistProducts);
         } catch (Exception e) {
-            // Handle any errors
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while fetching wishlists.");
         }
@@ -234,30 +232,24 @@ public class productController {
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Thursday 23 jan 2025
-    // Function : Delete Wishlist Product by id
-    // Give id and delete that id product
+    // Date : Thursday, 23 Jan 2025
+    // Function : Delete Wishlist Product by ID
+    // Input: Wishlist ID
     ///////////////////////////////////////////
-    @DeleteMapping("/user/deleteWishlist/{id}")
-    public ResponseEntity<?> deleteWishlistById(@PathVariable Integer id) {
+    @DeleteMapping("/wishlist/delete/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteWishlistById(@PathVariable Long id) {
         try {
-            // Check if the wishlist exists
-            wishlist wishlistItem = wishlistrepo.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Wishlist not found with ID: " + id));
+            wishlist wish = wishlistrepo.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Wishlist item not found with ID: " + id));
 
-            // Delete the wishlist item
-            wishlistrepo.delete(wishlistItem);
-
-            // Return success response
-            return ResponseEntity.ok(new messageHelper(true, "Wishlist item deleted successfully with ID: " + id));
+            wishlistrepo.delete(wish);
+            return ResponseEntity.ok("Wishlist item deleted successfully with ID: " + id);
         } catch (RuntimeException e) {
-            // Handle specific exception when wishlist item is not found
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new messageHelper(false, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            // Handle generic exceptions
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new messageHelper(false, "An error occurred: " + e.getMessage()));
+                    .body("An error occurred: " + e.getMessage());
         }
     }
 
@@ -308,12 +300,9 @@ public class productController {
         return new ResponseEntity<>(service.getAllProduct(), HttpStatus.OK);
     }
 
-	@PostMapping("/user/product/category/{category}")
-	public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) 
-	{
-	       return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
-	}
-
-    
+    @PostMapping("/user/product/category/{category}")
+    public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) {
+        return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
+    }
 
 }

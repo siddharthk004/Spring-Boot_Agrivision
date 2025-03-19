@@ -17,15 +17,14 @@ public class CloudinaryService {
     private final Cloudinary cloudinary;
 
     public CloudinaryService(
-        @Value("${cloudinary.cloud_name}") String cloudName,
-        @Value("${cloudinary.api_key}") String apiKey,
-        @Value("${cloudinary.api_secret}") String apiSecret) {
-        
+            @Value("${cloudinary.cloud_name}") String cloudName,
+            @Value("${cloudinary.api_key}") String apiKey,
+            @Value("${cloudinary.api_secret}") String apiSecret) {
+
         this.cloudinary = new Cloudinary(ObjectUtils.asMap(
-            "cloud_name", cloudName,
-            "api_key", apiKey,
-            "api_secret", apiSecret
-        ));
+                "cloud_name", cloudName,
+                "api_key", apiKey,
+                "api_secret", apiSecret));
     }
 
     // Upload images and videos
@@ -50,11 +49,9 @@ public class CloudinaryService {
             if (pdfFile == null || !pdfFile.exists()) {
                 throw new IOException("PDF file does not exist.");
             }
-
             Map uploadResult = cloudinary.uploader().upload(pdfFile, ObjectUtils.asMap(
-                "resource_type", "raw"  // PDFs are uploaded as "raw" files
-            ));
-            
+                    "resource_type", "auto"));
+
             return (String) uploadResult.get("url");
 
         } catch (Exception e) {

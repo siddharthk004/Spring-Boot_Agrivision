@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.agri.vision.DTO.LabelRequest;
 import com.agri.vision.Model.Pdf;
 import com.agri.vision.Model.user;
 import com.agri.vision.Repo.PdfRepo;
@@ -21,13 +22,16 @@ import com.agri.vision.Service.JwtService;
 import com.agri.vision.Service.PdfGeneratorService;
 
 @RestController
-@RequestMapping("/pdf")
+@RequestMapping("/api/v1/auth/user/")
 public class PdfController {
     private final PdfGeneratorService pdfGeneratorService;
 
     public PdfController(PdfGeneratorService pdfGeneratorService) {
         this.pdfGeneratorService = pdfGeneratorService;
     }
+
+    @Autowired
+    private PdfGeneratorService pdfService;
 
     @Autowired
     private PdfRepo pdfrepo;
@@ -37,7 +41,6 @@ public class PdfController {
 
     @Autowired
     private userRepo userrepo;
-
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
@@ -75,12 +78,11 @@ public class PdfController {
         }
     }
 
-
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
     // day , Date : Saturday 22 Feb 2025
     // Function : Download PDF
-    // give token And  download the order pdf 
+    // give token And download the order pdf
     ///////////////////////////////////////////
     @GetMapping("/Download-Pdf")
     public ResponseEntity<List<Pdf>> downloadPdf(@RequestHeader("Authorization") String token) {
@@ -107,6 +109,22 @@ public class PdfController {
             return ResponseEntity.ok(pdfFiles);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 18 March 2025
+    // Function : Download Invoice
+    ///////////////////////////////////////////
+    @PostMapping("/generate-label")
+    public ResponseEntity<String> generateLabel(@RequestBody LabelRequest request) {
+        try {
+            String fileUrl = pdfService.generateAndUploadLabel(request);
+            return ResponseEntity.ok(fileUrl);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error generating PDF: " + e.getMessage());
         }
     }
 

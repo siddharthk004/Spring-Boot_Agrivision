@@ -24,6 +24,7 @@ public class OrderController {
 
     @PostMapping(value = "/order/buy", consumes = "application/json", produces = "application/json")
     public ResponseEntity<OrderResponse> buyNow(@RequestBody OrderRequest orderRequest) {
+        System.out.println("Hello Order");
         OrderResponse order = orderService.buyNow(orderRequest);
         return ResponseEntity.ok(order);
     }

@@ -1,10 +1,6 @@
 package com.agri.vision.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
+import jakarta.persistence.*;
 
 @Entity
 public class wishlist {
@@ -13,15 +9,10 @@ public class wishlist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String productname;
-    private String username;
-    private String productcompanyname;
-    private String productimage;
-    private int discount;
-    private int beforediscount;
-    private int afterdiscount;
+    private String username;  // Fixed field naming
+    private Long productId;
 
-    // Getters and setters
+    // Getters & Setters
     public Long getId() {
         return id;
     }
@@ -30,13 +21,6 @@ public class wishlist {
         this.id = id;
     }
 
-    public String getProductname() {
-        return productname;
-    }
-
-    public void setProductname(String productname) {
-        this.productname = productname;
-    }
     public String getUsername() {
         return username;
     }
@@ -45,44 +29,11 @@ public class wishlist {
         this.username = username;
     }
 
-    public String getProductcompanyname() {
-        return productcompanyname;
+    public Long getProductId() {
+        return productId;
     }
 
-    public void setProductcompanyname(String productcompanyname) {
-        this.productcompanyname = productcompanyname;
-    }
-
-    public String getProductimage() {
-        return productimage;
-    }
-
-    public void setProductimage(String productimage) {
-        this.productimage = productimage;
-    }
-
-    public int getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(int discount) {
-        this.discount = discount;
-    }
-
-    public int getBeforediscount() {
-        return beforediscount;
-    }
-
-    public void setBeforediscount(int beforediscount) {
-        this.beforediscount = beforediscount;
-    }
-
-    public int getAfterdiscount() {
-        return afterdiscount;
-    }
-
-    public void setAfterdiscount(int afterdiscount) {
-        this.afterdiscount = afterdiscount;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 }
-

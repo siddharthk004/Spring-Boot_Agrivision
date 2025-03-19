@@ -1,20 +1,17 @@
 package com.agri.vision.Repo;
 
 import com.agri.vision.Model.wishlist;
-
+import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 public interface wishlistRepo extends JpaRepository<wishlist, Long> {
 
-    Optional<wishlist> findById(Integer id);
+    Optional<wishlist> findById(Long id);
 
-    boolean existsByUsernameAndProductname(String usernameFromToken, String productname);
+    boolean existsByUsernameAndProductId(String username, Long productId);
 
-    List<wishlist> findByUsername(String email);
+    List<wishlist> findByUsername(String username);  // Corrected non-static implementation
 
-    int countByUsername(String email);
-
+    int countByUsername(String username);
 }

@@ -8,17 +8,25 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.agri.vision.DTO.LabelRequest;
 import com.agri.vision.Model.Pdf;
 import com.agri.vision.Repo.PdfRepo;
+import com.itextpdf.barcodes.Barcode128;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 
@@ -180,5 +188,77 @@ public class PdfGeneratorService {
         } catch (Exception e) {
             throw new RuntimeException("Error generating PDF", e);
         }
+    }
+
+    public String generateAndUploadLabel(LabelRequest request) throws Exception {
+        // Generate a unique filename
+        String uniqueFileName = "shipping_label_" + System.currentTimeMillis() + ".pdf";
+        File pdfFile = new File(uniqueFileName);
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(pdfFile)) {
+            PdfWriter writer = new PdfWriter(fileOutputStream);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            // Load font
+            PdfFont boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+            PdfFont regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
+
+            // Add Header
+            Table headerTable = new Table(1).useAllAvailableWidth();
+            headerTable.addCell(new Cell().add(new Paragraph("IN DHL AND FEES CASH")
+                    .setFont(boldFont).setFontSize(10))
+                    .setBorder(Border.NO_BORDER));
+            headerTable.addCell(new Cell().add(new Paragraph(
+                    "No Date Required         REPLY POSTAGE\n1 lb Priority Mail Rate Local\nCommercial Base Pricing"))
+                    .setFont(regularFont).setFontSize(8))
+                    .setBorder(Border.NO_BORDER);
+
+            document.add(headerTable);
+            document.add(new Paragraph("**VOID - DO NOT MAIL**")
+                    .setFont(boldFont).setFontSize(10).setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph("USPS PRIORITY MAIL®")
+                    .setFont(boldFont).setFontSize(16).setTextAlignment(TextAlignment.CENTER));
+
+            // Sender & Receiver Info
+            document.add(new Paragraph("From: Agrivision\nStore No :- 5421A\nAhmednagar 414616\nMaharashtra, IN 98524-51542")
+                    .setFont(regularFont).setFontSize(10));
+            document.add(new Paragraph("SHIP TO:").setFont(boldFont).setFontSize(10));
+            document.add(new Paragraph(request.getName() + "\n" + request.getAddress())
+                    .setFont(regularFont).setFontSize(10));
+
+            document.add(new Paragraph("ZIP - e/ IN DELIVERY CONFIRM")
+                    .setFont(boldFont).setFontSize(12).setTextAlignment(TextAlignment.CENTER));
+
+            // Generate Barcode
+            Barcode128 barcode = new Barcode128(pdf);
+            barcode.setCode("4205354591123412341234123412341234");
+            Image barcodeImage = new Image(barcode.createFormXObject(pdf));
+            barcodeImage.setWidth(250);
+            barcodeImage.setHorizontalAlignment(HorizontalAlignment.CENTER);
+            document.add(barcodeImage);
+
+            // Pricing Info
+            document.add(new Paragraph("Total Price: RS " + request.getTotalPrice())
+                    .setFont(boldFont).setFontSize(12).setTextAlignment(TextAlignment.LEFT));
+            document.add(new Paragraph("ELECTRONIC RATE APPROVED # 805213907")
+                    .setFont(regularFont).setFontSize(8).setTextAlignment(TextAlignment.CENTER));
+
+            document.close();
+        }
+
+        // Upload PDF to Cloudinary
+        String fileUrl = cloudinaryService.uploadPdf(pdfFile);
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            throw new RuntimeException("PDF upload to Cloudinary failed.");
+        }
+
+        // // Save PDF details in the database
+        // Pdf pdfRecord = new Pdf();
+        // pdfRecord.setUserid((long) request.getTotalPrice());
+        // pdfRecord.setPdfurl(fileUrl);
+        // PdfRepo.save(pdfRecord);
+
+        return fileUrl;
     }
 }

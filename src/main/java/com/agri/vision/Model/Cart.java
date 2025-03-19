@@ -11,77 +11,27 @@ public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String productname;
+    
     private String username;
-    private String productcompanyname;
-    private String productimage;
-    private int discount;
-    private int beforediscount;
-    private int afterdiscount;
-
-    // Getters and setters
+    private Long productId; // Storing only product ID
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getProductname() {
-        return productname;
-    }
-
-    public void setProductname(String productname) {
-        this.productname = productname;
     }
     public String getUsername() {
         return username;
     }
-
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUsername(String uId) {
+        username = uId;
+    }
+    public Long getProductId() {
+        return productId;
+    }
+    public void setProductId(Long pId) {
+        productId = pId;
     }
 
-    public String getProductcompanyname() {
-        return productcompanyname;
-    }
-
-    public void setProductcompanyname(String productcompanyname) {
-        this.productcompanyname = productcompanyname;
-    }
-
-    public String getProductimage() {
-        return productimage;
-    }
-
-    public void setProductimage(String productimage) {
-        this.productimage = productimage;
-    }
-
-    public int getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(int discount) {
-        this.discount = discount;
-    }
-
-    public int getBeforediscount() {
-        return beforediscount;
-    }
-
-    public void setBeforediscount(int beforediscount) {
-        this.beforediscount = beforediscount;
-    }
-
-    public int getAfterdiscount() {
-        return afterdiscount;
-    }
-
-    public void setAfterdiscount(int afterdiscount) {
-        this.afterdiscount = afterdiscount;
-    }
 }
 
