@@ -14,4 +14,5 @@ public interface CartRepo extends JpaRepository<Cart, Long> {
     Optional<Cart> findById(Integer id);
     int countByUsername(String uname);
     boolean existsByUsernameAndProductId(String usernameFromToken, Long productId);
+    Cart findByUsernameAndProductId(String usernameFromToken, Long productId);
 }

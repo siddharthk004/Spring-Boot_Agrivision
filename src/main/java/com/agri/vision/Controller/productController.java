@@ -1,5 +1,6 @@
 package com.agri.vision.Controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,11 +65,10 @@ public class productController {
     @PostMapping("/addToCart")
     public ResponseEntity<?> addToCart(
             @RequestHeader("Authorization") String token,
-            @RequestBody Map<String, Long> request) { // Expecting only productId in request body
+            @RequestBody Map<String, Long> request) {
         try {
             // Extract the username from the token
-            String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in
-                                                                                       // token
+            String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix
 
             // Extract productId from request
             Long productId = request.get("productId");
@@ -77,22 +77,63 @@ public class productController {
             }
 
             // Check if the product already exists in the cart for the given user
-            boolean exists = cartrepo.existsByUsernameAndProductId(usernameFromToken, productId);
-            if (exists) {
-                return ResponseEntity.badRequest().body("Product already exists in the cart!");
+            Cart existingCartItem = cartrepo.findByUsernameAndProductId(usernameFromToken, productId);
+            if (existingCartItem != null) {
+                return ResponseEntity.badRequest()
+                        .body("Product already exists in the cart! Use update API to modify quantity.");
             }
 
-            // Create and populate a Cart object with only productId
+            // Create and populate a Cart object with initial quantity 1
             Cart cart = new Cart();
             cart.setUsername(usernameFromToken);
-            cart.setProductId(productId); // Storing only the product ID
+            cart.setProductId(productId);
+            cart.setQuantity(1); // Setting initial quantity to 1
 
             // Save to the cart repository
             cartrepo.save(cart);
 
-            // Return success response
             return ResponseEntity.ok("Product added to cart successfully!");
+        } catch (RuntimeException e) {
+            System.err.println("Error: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Login please | Username ID not found");
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+        }
+    }
 
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Sunday 23 Mar 2025
+    // Function : Update Cart Quantity
+    ///////////////////////////////////////////
+    @PostMapping("/updateCartQuantity")
+    public ResponseEntity<?> updateCartQuantity(
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, Integer> request) {
+        try {
+            // Extract the username from the token
+            String usernameFromToken = jwtService.extractUsername(token.substring(7));
+
+            // Extract productId and new quantity from request
+            Long productId = Long.valueOf(request.get("productId"));
+            Integer quantity = request.get("quantity");
+
+            if (productId == null || quantity == null || quantity <= 0) {
+                return ResponseEntity.badRequest().body("Valid product ID and quantity are required!");
+            }
+
+            // Find the cart item
+            Cart cartItem = cartrepo.findByUsernameAndProductId(usernameFromToken, productId);
+            if (cartItem == null) {
+                return ResponseEntity.badRequest().body("Product not found in the cart!");
+            }
+
+            // Update quantity
+            cartItem.setQuantity(quantity);
+            cartrepo.save(cartItem);
+
+            return ResponseEntity.ok("Cart quantity updated successfully!");
         } catch (RuntimeException e) {
             System.err.println("Error: " + e.getMessage());
             return ResponseEntity.badRequest().body("Login please | Username ID not found");
@@ -121,11 +162,17 @@ public class productController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No cart found for this user.");
             }
 
-            // Fetch product details for each productId in the cart
-            List<product> cartProducts = carts.stream()
-                    .map(cart -> productRepo.findById(cart.getProductId()).orElse(null))
-                    .filter(Objects::nonNull) // Remove any null results
-                    .collect(Collectors.toList());
+            // Fetch product details along with quantity for each productId in the cart
+            List<Map<String, Object>> cartProducts = carts.stream().map(cart -> {
+                product product = productRepo.findById(cart.getProductId()).orElse(null);
+                if (product != null) {
+                    Map<String, Object> productDetails = new HashMap<>();
+                    productDetails.put("product", product);
+                    productDetails.put("quantity", cart.getQuantity());
+                    return productDetails;
+                }
+                return null;
+            }).filter(Objects::nonNull).collect(Collectors.toList());
 
             return ResponseEntity.ok(cartProducts);
         } catch (Exception e) {
@@ -236,7 +283,7 @@ public class productController {
     // Function : Delete Wishlist Product by ID
     // Input: Wishlist ID
     ///////////////////////////////////////////
-    @DeleteMapping("/wishlist/delete/{id}")
+    @DeleteMapping("/user/wishlist/delete/{id}")
     @Transactional
     public ResponseEntity<?> deleteWishlistById(@PathVariable Long id) {
         try {
@@ -292,34 +339,27 @@ public class productController {
     // view all product , product by id , product by category
     ////////////////////////////////////////////////////////////
 
-  @Autowired
-  private productService service;
-  
+    @Autowired
+    private productService service;
 
-@PostMapping("/user/product")
-	public ResponseEntity<List<product>> getAllProduct()
-	{
-		return new ResponseEntity<>(service.getAllProduct(), HttpStatus.OK);
-	}
-    
-	@PostMapping("/user/product/id/{id}")
-	public ResponseEntity<product> getProductById(@PathVariable("id") int id)
-	{
-		product product = service.getProductById(id);
-		if(product !=null)
-		{
-			return new ResponseEntity<>(service.getProductById(id),HttpStatus.OK);
-		}
-		else
-		{
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+    @PostMapping("/user/product")
+    public ResponseEntity<List<product>> getAllProduct() {
+        return new ResponseEntity<>(service.getAllProduct(), HttpStatus.OK);
+    }
 
-	@PostMapping("/user/product/category/{category}")
-	public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) 
-	{
-	       return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
-	}
+    @PostMapping("/user/product/id/{id}")
+    public ResponseEntity<product> getProductById(@PathVariable("id") int id) {
+        product product = service.getProductById(id);
+        if (product != null) {
+            return new ResponseEntity<>(service.getProductById(id), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/user/product/category/{category}")
+    public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) {
+        return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
+    }
 
 }
