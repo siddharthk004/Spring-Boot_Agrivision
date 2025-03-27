@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.agri.vision.DTO.WishlistProductDTO;
 import com.agri.vision.Model.Cart;
 import com.agri.vision.Model.product;
 import com.agri.vision.Model.wishlist;
@@ -253,29 +254,32 @@ public class productController {
     // Input: Token
     ///////////////////////////////////////////
     @GetMapping("/wishlist/view")
-    public ResponseEntity<?> getAllWishlistItems(@RequestHeader("Authorization") String token) {
-        try {
-            String username = jwtService.extractUsername(token.substring(7));
+public ResponseEntity<?> getAllWishlistItems(@RequestHeader("Authorization") String token) {
+    try {
+        String username = jwtService.extractUsername(token.substring(7));
 
-            // Fetch wishlist items by username
-            List<wishlist> wishlists = wishlistrepo.findByUsername(username);
+        // Fetch wishlist items by username
+        List<wishlist> wishlists = wishlistrepo.findByUsername(username);
 
-            if (wishlists.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No wishlist found for this user.");
-            }
-
-            // Fetch full product details for each wishlist item
-            List<product> wishlistProducts = wishlists.stream()
-                    .map(w -> productRepo.findById(w.getProductId()).orElse(null))
-                    .filter(Objects::nonNull) // Remove null values
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(wishlistProducts);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while fetching wishlists.");
+        if (wishlists.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No wishlist found for this user.");
         }
+
+        // Convert wishlist items to WishlistProductDTO
+        List<WishlistProductDTO> wishlistProducts = wishlists.stream()
+                .map(w -> productRepo.findById(w.getProductId())
+                        .map(p -> new WishlistProductDTO(w.getId(), p))
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(wishlistProducts);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("An error occurred while fetching wishlists.");
     }
+}
+
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
