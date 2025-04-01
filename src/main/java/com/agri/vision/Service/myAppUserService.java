@@ -1,5 +1,6 @@
 package com.agri.vision.Service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,9 +12,12 @@ import com.agri.vision.Repo.userRepo;
 @Service
 public class myAppUserService implements UserDetailsService {
 
+    @Autowired
+    private userRepo userrepo;
+    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        user userObj = userRepo.findByUsername(username);
+        user userObj = userrepo.findByUsername(username);
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(userObj.getUsername())

@@ -2,7 +2,6 @@ package com.agri.vision.Config;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,25 +29,24 @@ public class securityConfig {
     private final myAppUserService appUserService;
     private final JwtFilter jwtFilter;
 
-    @Autowired
     public securityConfig(myAppUserService appUserService, JwtFilter jwtFilter) {
         this.appUserService = appUserService;
         this.jwtFilter = jwtFilter;
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
             throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider() {
+    AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(appUserService);
         provider.setPasswordEncoder(passwordEncoder());
@@ -56,7 +54,7 @@ public class securityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .cors().configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
@@ -82,7 +80,7 @@ public class securityConfig {
     }
 
     @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
+    AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, authException) -> {
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

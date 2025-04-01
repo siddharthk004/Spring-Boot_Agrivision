@@ -296,6 +296,107 @@ public class userController {
 
             // Fetch the email using the username
             String email = userrepo.getEmailByUsername(usernameFromToken);
+<<<<<<< HEAD
+=======
+
+            // Check if email exists
+            if (email == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found for the user.");
+            }
+
+            String otp = generateOTPService.generateOtp(6);
+            System.out.println("otp " + otp);
+
+            String subject = "AgriVision OTP - Email";
+            String message = "Your OTP is: " + otp;
+
+            boolean success = emailService.sendEmail(email, subject, message);
+            if (success) {
+                // Find the existing user by username (from the token)
+                userotp existingUser = userotprepo.findByUsername(usernameFromToken);
+                if (existingUser == null) {
+                    userotp newotp = new userotp();
+                    newotp.setUsername(usernameFromToken);
+                    newotp.setOtp(otp);
+                    userotprepo.save(newotp);
+                } else {
+                    existingUser.setUsername(usernameFromToken);
+                    existingUser.setOtp(otp);
+                    userotprepo.save(existingUser);
+                }
+
+                return ResponseEntity.ok("OTP sent successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Failed to send OTP");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + e.getMessage());
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Wednesday 28 jan 2025
+    // Function : get otp and cheak it is correct ?
+    ///////////////////////////////////////////
+    @PostMapping("/user/forgotPassword/OTP")
+    public ResponseEntity<?> forgotPasswordValidateOtp(@RequestHeader("Authorization") String token,
+            @RequestBody Long userotp) {
+        try {
+            // Extract the username from the token (assuming "Bearer " prefix)
+            String usernameFromToken = jwtService.extractUsername(token.substring(7));
+
+            // Fetch the email using the username
+            Long DBotp = userrepo.getOtpByUsername(usernameFromToken);
+
+            userotp existingUser = userotprepo.findByUsername(usernameFromToken);
+
+            if (DBotp == userotp) {
+                // delete that id row from database
+                userotprepo.deleteById(existingUser.getId());
+                return ResponseEntity.ok(true);
+            } else {
+                return ResponseEntity.ok(false);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + e.getMessage());
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Thursday 29 jan 2025
+    // Function : New PassWord
+    // give token and password and it will update the pasword of that specific user
+    ///////////////////////////////////////////
+    @PostMapping("/user/forgotPassword/NewPassword")
+    public ResponseEntity<?> newPassword(@RequestHeader("Authorization") String token,
+            @RequestBody String password) {
+        try {
+            // Extract the username from the token (assuming "Bearer " prefix)
+            String usernameFromToken = jwtService.extractUsername(token.substring(7));
+
+            // Find the user password for update by username (from the token)
+            user user = userrepo.getUserByUserName(usernameFromToken);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
+
+            // Update the user password
+            user.setPassword(passwordEncoder.encode(password));
+            userrepo.save(user);
+
+            return ResponseEntity.ok(true);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + e.getMessage());
+        }
+    }
+>>>>>>> 585740887e5f96ec3be9e63fca9b05e8a93f87ef
 
             // Check if email exists
             if (email == null) {

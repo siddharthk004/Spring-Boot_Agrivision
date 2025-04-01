@@ -18,8 +18,8 @@ public class product {
     private String category;
     private int discount;
     private int beforediscount;
-    private int afterdiscount;
     private int quantity;
+    private int afterdiscount;
     private String Status;
 
     // Default constructor
