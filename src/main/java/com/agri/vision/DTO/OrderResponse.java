@@ -1,18 +1,17 @@
 package com.agri.vision.DTO;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.agri.vision.Model.Order;
-import com.agri.vision.Model.OrderItem;
+
 
 public class OrderResponse {
 
     private Long orderId;
     private Long userId;
-    private List<OrderItem> orderItems;
+    private List<OrderItemDTO> orderItems;
     private double subtotal;
     private String orderStatus;
     private String shippingAddress;
@@ -39,11 +38,19 @@ public class OrderResponse {
         this.userId = userId;
     }
 
-    public List<OrderItem> getOrderItems() {
+    public double getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(double subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public List<OrderItemDTO> getOrderItems() {
         return orderItems;
     }
 
-    public void setOrderItems(List<OrderItem> orderItems) {
+    public void setOrderItems(List<OrderItemDTO> orderItems) {
         this.orderItems = orderItems;
     }
 
@@ -90,22 +97,12 @@ public class OrderResponse {
         this.shippingAddress = order.getShippingAddress();
         this.orderDate = order.getOrderDate();
 
-        // Handle null or empty order items
-        if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
-            this.orderItems = order.getOrderItems().stream()
-                    .map(item -> item)
-                    .collect(Collectors.toList());
-        } else {
-            this.orderItems = Collections.emptyList();
-        }
+        // Convert List<OrderItem> to List<OrderItemDTO>
+        List<OrderItemDTO> orderItemDTOs = order.getOrderItems().stream()
+                .map(orderItem -> new OrderItemDTO(
+                        orderItem.getProduct().getId(), // Assuming OrderItem has getProduct()
+                        orderItem.getQuantity() // Assuming OrderItem has getQuantity()
+                ))
+                .collect(Collectors.toList());
     }
-
-    public double getSubtotal() {
-        return subtotal;
-    }
-
-    public void setSubtotal(double subtotal) {
-        this.subtotal = subtotal;
-    }
-
 }

@@ -1,28 +1,34 @@
 package com.agri.vision.Controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.agri.vision.DTO.AdminRequest;
+import com.agri.vision.Model.AddManage;
 import com.agri.vision.Model.Admin;
 import com.agri.vision.Model.product;
+import com.agri.vision.Repo.AddManageRepo;
 import com.agri.vision.Repo.AdminRepo;
 import com.agri.vision.Repo.productRepo;
 import com.agri.vision.Service.AdminService;
+import com.agri.vision.Service.CloudinaryService;
 import com.agri.vision.Service.productService;
 import com.cloudinary.Cloudinary;
 
@@ -31,7 +37,11 @@ import com.cloudinary.Cloudinary;
 @CrossOrigin(origins = "/**")
 @RequestMapping("/api/v1/auth")
 public class AdminController {
+    private final CloudinaryService cloudinaryService;
 
+    public AdminController(CloudinaryService cloudinaryService) {
+        this.cloudinaryService = cloudinaryService;
+    }
     @Autowired
     private AdminService adminService;
 
@@ -40,6 +50,9 @@ public class AdminController {
 
     @Autowired
     private productService service;
+
+    @Autowired
+    private AddManageRepo Addrepo;
 
     @Autowired
     private productRepo repo;
@@ -51,7 +64,7 @@ public class AdminController {
     // Name : Sakshi Ladkat
     // day , Date :Wednsday 19 feb 2025
     // Function : Admin Login
-    // Admin login credentials are username = admin password=admin@123
+    // Admin login credentials are username=Admin password=admin@123
     // if Admin Table is Empty it will create Admin with Above credentials
     ////////////////////////////////////////////////////////////
     @PostMapping("admin/login")
@@ -103,7 +116,7 @@ public class AdminController {
         }
     }
 
-    @PatchMapping("/admin/updateproduct/{id}")
+    @PostMapping("/admin/updateproduct/{id}")
     public ResponseEntity<?> updateProductFields(
             @PathVariable Long id,
             @RequestParam(value = "productimage", required = false) MultipartFile productimage,
@@ -121,4 +134,113 @@ public class AdminController {
         }
     }
 
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Monday 11 Mar 2025
+    // Function : Admin View All Add
+    ////////////////////////////////////////////////////////////
+    @GetMapping("/admin/add")
+    public List<AddManage> getAllAdd() {
+        return Addrepo.findAll();
+    }
+
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Tuesday 12 Mar 2025
+    // Function : Admin View Add By id
+    ////////////////////////////////////////////////////////////
+    @GetMapping("/admin/add/{id}")
+    public Optional<AddManage> getAddByID(@PathVariable Long id) {
+        return Addrepo.findById(id);
+    }
+
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Wednesday 13 Mar 2025
+    // Function : Admin Delete Add By id
+    ////////////////////////////////////////////////////////////
+    @PostMapping("/admin/Deleteadd/{id}")
+    public ResponseEntity<String> Deleteadd(@PathVariable Long id) {
+        try {
+            Addrepo.deleteById(id);
+            return ResponseEntity.ok("success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete");
+        }
+    }
+
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Friday 14 Mar 2025
+    // Function : Admin Update Add By ID
+    ////////////////////////////////////////////////////////////
+    @PostMapping("/admin/Updateadd/{id}")
+    public ResponseEntity<String> updateImage(@PathVariable Long id,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        try {
+            return Addrepo.findById(id).map(existingRecord -> {
+                if (image != null && !image.isEmpty()) {
+                    System.out.println("Image Content Type: " + image.getContentType());
+
+                    // Validate file type
+                    if (!image.getContentType().startsWith("image/")) {
+                        return ResponseEntity.badRequest().body("Invalid image file format.");
+                    }
+
+                    // Upload new image
+                    String newImageUrl = cloudinaryService.uploadFile(image);
+                    if (newImageUrl == null || newImageUrl.isEmpty()) {
+                        return ResponseEntity.badRequest().body("Image upload failed.");
+                    }
+
+                    // Update image URL
+                    existingRecord.setAddurl(newImageUrl);
+                    Addrepo.save(existingRecord);
+
+                    return ResponseEntity.ok("Image updated successfully.");
+                } else {
+                    return ResponseEntity.badRequest().body("No image provided.");
+                }
+            }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Record not found."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update image.");
+        }
+    }
+
+    
+    /////////////////////////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Friday 14 Mar 2025
+    // Function : Admin Add New Add
+    ////////////////////////////////////////////////////////////
+    @PostMapping("/admin/addImage")
+    public ResponseEntity<String> addImage(@RequestPart("image") MultipartFile image) {
+        try {
+            if (image == null || image.isEmpty()) {
+                return ResponseEntity.badRequest().body("No image provided.");
+            }
+    
+            if (!image.getContentType().startsWith("image/")) {
+                return ResponseEntity.badRequest().body("Invalid image file format.");
+            }
+    
+            // Upload image to Cloudinary
+            String imageUrl = cloudinaryService.uploadFile(image);
+            if (imageUrl == null || imageUrl.isEmpty()) {
+                return ResponseEntity.badRequest().body("Image upload failed.");
+            }
+    
+            // Create a new record
+            AddManage newImageRecord = new AddManage();
+            newImageRecord.setAddurl(imageUrl);  // Assuming 'addurl' stores the image URL
+    
+            // Save to database
+            Addrepo.save(newImageRecord);
+    
+            return ResponseEntity.ok("Image added successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add image.");
+        }
+    }
+    
 }

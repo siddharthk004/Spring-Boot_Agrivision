@@ -19,6 +19,8 @@ import com.agri.vision.Repo.userRepo;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -108,11 +110,39 @@ public class OrderService {
         OrderResponse response = new OrderResponse();
         response.setOrderId(order.getId());
         response.setUserId(order.getUser().getId());
-        response.setOrderItems(order.getOrderItems());
+
+        
+        List<OrderItemDTO> orderItemDTOs = order.getOrderItems().stream()
+                .map(orderItem -> new OrderItemDTO(
+                        orderItem.getProduct().getId(), 
+                        orderItem.getQuantity()))
+                .collect(Collectors.toList());
+
+        response.setOrderItems(orderItemDTOs); 
+
         response.setSubtotal(order.getSubTotal());
         response.setOrderStatus(order.getOrderstatus());
         response.setShippingAddress(order.getShippingAddress());
         response.setOrderDate(order.getOrderDate());
+
         return response;
     }
+
+    public List<Order> getAllOrders() {
+        return orderrepo.findAll();
+    }
+
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderrepo.findByUserId(userId);
+    }
+
+   
+    public Optional<Order> getOrderById(Long orderId) {
+        return orderrepo.findById(orderId);
+    }
+
+    public Order getOrderByIdForUser(Long orderId, Long userId) {
+        return orderrepo.findByIdAndUserId(orderId, userId);
+    }
+
 }

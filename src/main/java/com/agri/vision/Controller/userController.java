@@ -5,11 +5,15 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,14 +23,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.agri.vision.DTO.UserRegistrationRequest;
 import com.agri.vision.Model.LoginReq;
 import com.agri.vision.Model.user;
+import com.agri.vision.Model.userotp;
+import com.agri.vision.Repo.userOtpRepo;
 import com.agri.vision.Repo.userRepo;
+import com.agri.vision.Service.EmailService;
+import com.agri.vision.Service.GenerateOTPService;
 import com.agri.vision.Service.JwtService;
 
 @Controller
@@ -38,14 +43,28 @@ public class userController {
     private static final Logger logger = LoggerFactory.getLogger(userController.class);
 
     @Autowired
+    private GenerateOTPService generateOTPService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
     private JwtService jwtService;
 
     @Autowired
     private userRepo userrepo;
 
     @Autowired
+    private userOtpRepo userotprepo;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile 
+    // day , Date : Tuesday 14 jan 2025
+    // Function : Encode the Password
+    ///////////////////////////////////////////
     public void encodeExistingPasswords() {
         List<user> users = userrepo.findAll();
         for (user user : users) {
@@ -109,7 +128,7 @@ public class userController {
     public ResponseEntity<?> signin(@RequestBody LoginReq loginRequest) {
         try {
             // Retrieve the user by username
-            user user = userRepo.findByUsername(loginRequest.getUsername());
+            user user = userrepo.findByUsername(loginRequest.getUsername());
 
             // Compare the provided plain password with the hashed password
             if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
@@ -149,7 +168,7 @@ public class userController {
         System.out.println(authentication);
 
         // Fetch the user from the database
-        user user = userRepo.findByUsername(username);
+        user user = userrepo.findByUsername(username);
 
         // If the user is not found, handle it appropriately
         if (user == null) {
@@ -190,7 +209,7 @@ public class userController {
         String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in token
 
         // Find the existing user by username (from the token)
-        user existingUser = userRepo.findByUsername(usernameFromToken);
+        user existingUser = userrepo.findByUsername(usernameFromToken);
         if (existingUser == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
@@ -221,14 +240,14 @@ public class userController {
         response.put("contact", existingUser.getContact());
         response.put("occupation", existingUser.getOccupation());
         response.put("profileImage",
-        existingUser.getProfileImage() != null ? "Profile image updated" : "No profile image");
+                existingUser.getProfileImage() != null ? "Profile image updated" : "No profile image");
 
         return ResponseEntity.ok(response); // Return updated details
     }
 
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
-    // day , Date : Tuesday 24 jan 2025
+    // day , Date :Tuesday 24 jan 2025
     // Function : edit Profile picture Of USer
     // give token and Profile Picture that we want to update and return success
     ///////////////////////////////////////////
@@ -236,26 +255,26 @@ public class userController {
     public ResponseEntity<?> editProfilePic(
             @RequestHeader("Authorization") String token,
             @RequestPart(value = "image", required = false) MultipartFile image) {
-    
+
         // Extract the username from the token
         String usernameFromToken = jwtService.extractUsername(token.substring(7)); // Assuming "Bearer " prefix in token
-    
+
         // Find the existing user by username (from the token)
-        user existingUser = userRepo.findByUsername(usernameFromToken);
+        user existingUser = userrepo.findByUsername(usernameFromToken);
         if (existingUser == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
-    
+
         // Check if an image is provided
         if (image == null || image.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No image file provided");
         }
-    
+
         try {
             // Update the profile image
             existingUser.setProfileImage(image.getBytes());
             userrepo.save(existingUser);
-    
+
             return ResponseEntity.ok("Profile picture updated successfully");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -263,6 +282,117 @@ public class userController {
         }
     }
 
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Wednesday 28 jan 2025
+    // Function : Sent Otp Through Email and Save it
+    // give token and generate the otp and sent email
+    ///////////////////////////////////////////
+    @PostMapping("/user/forgotPassword/MailOTP")
+    public ResponseEntity<?> forgotPasswordSendOtp(@RequestHeader("Authorization") String token) {
+        try {
+            // Extract the username from the token (assuming "Bearer " prefix)
+            String usernameFromToken = jwtService.extractUsername(token.substring(7));
 
+            // Fetch the email using the username
+            String email = userrepo.getEmailByUsername(usernameFromToken);
+
+            // Check if email exists
+            if (email == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found for the user.");
+            }
+
+            String otp = generateOTPService.generateOtp(6);
+            System.out.println("otp " + otp);
+
+            String subject = "AgriVision OTP - Email";
+            String message = "Your OTP is: " + otp;
+
+            boolean success = emailService.sendEmail(email, subject, message);
+            if (success) {
+                // Find the existing user by username (from the token)
+                userotp existingUser = userotprepo.findByUsername(usernameFromToken);
+                if (existingUser == null) {
+                    userotp newotp = new userotp();
+                    newotp.setUsername(usernameFromToken);
+                    newotp.setOtp(otp);
+                    userotprepo.save(newotp);
+                } else {
+                    existingUser.setUsername(usernameFromToken);
+                    existingUser.setOtp(otp);
+                    userotprepo.save(existingUser);
+                }
+
+                return ResponseEntity.ok("OTP sent successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Failed to send OTP");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + e.getMessage());
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Wednesday 28 jan 2025
+    // Function : get otp and cheak it is correct ?
+    ///////////////////////////////////////////
+    @PostMapping("/user/forgotPassword/OTP")
+    public ResponseEntity<?> forgotPasswordValidateOtp(@RequestHeader("Authorization") String token,
+            @RequestBody Long userotp) {
+        try {
+            // Extract the username from the token (assuming "Bearer " prefix)
+            String usernameFromToken = jwtService.extractUsername(token.substring(7));
+
+            // Fetch the email using the username
+            Long DBotp = userrepo.getOtpByUsername(usernameFromToken);
+
+            userotp existingUser = userotprepo.findByUsername(usernameFromToken);
+
+            if (DBotp == userotp) {
+                // delete that id row from database
+                userotprepo.deleteById(existingUser.getId());
+                return ResponseEntity.ok(true);
+            } else {
+                return ResponseEntity.ok(false);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + e.getMessage());
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Thursday 29 jan 2025
+    // Function : New PassWord
+    // give token and password and it will update the pasword of that specific user
+    ///////////////////////////////////////////
+    @PostMapping("/user/forgotPassword/NewPassword")
+    public ResponseEntity<?> newPassword(@RequestHeader("Authorization") String token,
+            @RequestBody String password) {
+        try {
+            // Extract the username from the token (assuming "Bearer " prefix)
+            String usernameFromToken = jwtService.extractUsername(token.substring(7));
+
+            // Find the user password for update by username (from the token)
+            user user = userrepo.getUserByUserName(usernameFromToken);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
+
+            // Update the user password
+            user.setPassword(passwordEncoder.encode(password));
+            userrepo.save(user);
+
+            return ResponseEntity.ok(true);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + e.getMessage());
+        }
+    }
 
 }

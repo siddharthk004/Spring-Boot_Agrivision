@@ -68,7 +68,7 @@ public class securityConfig {
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/auth/user/**", "/api/v1/auth/user/login", "/api/v1/auth/user/register",
-                        "/api/v1/auth/admin/**", "/api/v1/auth/admin/login", "/api/V1/auth/order/**")
+                        "/api/v1/auth/admin/**", "/api/v1/auth/admin/login", "/api/v1/auth/order/**")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()

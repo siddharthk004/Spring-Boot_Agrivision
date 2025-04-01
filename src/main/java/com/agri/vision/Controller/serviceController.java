@@ -1,30 +1,41 @@
 package com.agri.vision.Controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.agri.vision.DTO.MailRequest;
 import com.agri.vision.Model.service;
 import com.agri.vision.Model.user;
 import com.agri.vision.Repo.servRepo;
 import com.agri.vision.Repo.userRepo;
+import com.agri.vision.Service.EmailService;
 import com.agri.vision.Service.JwtService;
 
 @Controller
 @RestController
-@CrossOrigin(origins = "/**") // this url is react only this will be accept here
+@CrossOrigin(origins = "/**",allowedHeaders = "*") // this url is react only this will be accept here
 @RequestMapping("/api/v1/auth") // base url http://localhost:8080/ onwards
 public class serviceController {
 
     @Autowired
-    private JwtService jwtService;
+    private JwtService jwtService; 
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private userRepo userrepo;
 
     @Autowired
     public servRepo servrepo;
@@ -33,8 +44,9 @@ public class serviceController {
     // Name : Siddharth Kardile
     // day , Date : friday 24 jan 2025
     // Function : save user report
-    //   -give token and message and it will return the Success and confirm message and
-    //       also it will save the user email and name and desc together
+    // -give token and message and it will return the Success and confirm message
+    /////////////////////////////////////////// and
+    // also it will save the user email and name and desc together
     ///////////////////////////////////////////
     @PostMapping("/user/serviceMsgSend")
     public ResponseEntity<String> service(
@@ -46,7 +58,7 @@ public class serviceController {
             String usernameFromToken = jwtService.extractUsername(token.substring(7));
 
             // Find the existing user by username
-            user existingUser = userRepo.findByUsername(usernameFromToken);
+            user existingUser = userrepo.findByUsername(usernameFromToken);
             if (existingUser == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
@@ -62,23 +74,47 @@ public class serviceController {
 
             servrepo.save(newServiceEntry);
 
-            // Prepare and return the confirmation message
-            String confirmationMessage = String.format(
-                    "Dear %s,\n\nI hope this message finds you well.\n\n" +
-                            "I am pleased to inform you that the issue you reported has been resolved earlier than expected. "
-                            +
-                            "We have thoroughly tested the solution to ensure everything functions smoothly. " +
-                            "Please feel free to verify it on your end and let us know if there’s anything else we can assist you with.\n\n"
-                            +
-                            "Thank you for your patience and trust in us.\n\nBest regards,\nSiddharth Kardile\nAgri-Vision",
-                    existingUser.getUsername());
-
-            return ResponseEntity.ok(confirmationMessage);
+            return ResponseEntity.ok("Your Query Will be Solve Early ..");
 
         } catch (Exception e) {
             // Handle exceptions (e.g., invalid token, database issues)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Monday 3 Feb 2025
+    // Function : View All Service List
+    ///////////////////////////////////////////
+    @GetMapping("/admin/ViewHelpCenterList")
+    public List<service> getAllService() {
+        return servrepo.findAll();
+    }
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : thursday 7 feb 2025
+    // Function : user report send Via mail by admin
+    ///////////////////////////////////////////
+    @PostMapping("/admin/serviceMailSend")
+    public ResponseEntity<String> serviceMail(@RequestBody MailRequest request) {
+        try {
+            String mail = request.getMail();
+            String message = request.getMessage();
+            String subject = "Agrivision Query Resolve";
+    
+            boolean success = emailService.sendEmail(mail, subject, message);
+            if (success) {
+                // Delete the user report from the database
+                servrepo.deleteById(request.getId());
+                return ResponseEntity.ok("Success: Mail sent to " + mail);
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while sending mail");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        }
+    }   
 
 }
