@@ -366,5 +366,4 @@ public ResponseEntity<?> getAllWishlistItems(@RequestHeader("Authorization") Str
     public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) {
         return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
     }
-
 }

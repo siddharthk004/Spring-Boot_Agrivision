@@ -61,7 +61,7 @@ public class userController {
     private PasswordEncoder passwordEncoder;
 
     ///////////////////////////////////////////
-    // Name : Siddharth Kardile 
+    // Name : Siddharth Kardile
     // day , Date : Tuesday 14 jan 2025
     // Function : Encode the Password
     ///////////////////////////////////////////
@@ -394,5 +394,4 @@ public class userController {
                     .body("An error occurred: " + e.getMessage());
         }
     }
-
 }

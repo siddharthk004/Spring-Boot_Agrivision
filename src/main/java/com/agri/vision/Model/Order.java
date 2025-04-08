@@ -3,7 +3,6 @@ package com.agri.vision.Model;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.agri.vision.DTO.OrderItemDTO;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;

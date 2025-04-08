@@ -1,5 +1,6 @@
 package com.agri.vision.Model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,6 +22,10 @@ public class OrderItem {
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private product product;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private user customer;
 
     private int quantity;
     private int price;
@@ -49,7 +54,7 @@ public class OrderItem {
         this.product = product;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
@@ -63,6 +68,14 @@ public class OrderItem {
 
     public void setPrice(int price) {
         this.price = price;
+    }
+
+    public user getCustomerId() {
+        return customer;
+    }
+
+    public void setCustomerId(user customer) {
+        this.customer = customer;
     }
 
 }

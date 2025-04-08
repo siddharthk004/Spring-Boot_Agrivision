@@ -4,6 +4,13 @@ public class OrderItemDTO {
     private Long productId;
     private int quantity;
 
+    // Constructor
+    public OrderItemDTO(Long productId, int quantity) {
+        this.productId = productId;
+        this.quantity = quantity;
+    }
+
+    // Getters and Setters
     public Long getProductId() {
         return productId;
     }
@@ -19,13 +26,5 @@ public class OrderItemDTO {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-
-    public OrderItemDTO(Long productId, int quantity) {
-        this.productId = productId;
-        this.quantity = quantity;
-    }
-
-    public OrderItemDTO() {
-    }
-
+    
 }
