@@ -170,6 +170,7 @@ public class productController {
                     Map<String, Object> productDetails = new HashMap<>();
                     productDetails.put("product", product);
                     productDetails.put("quantity", cart.getQuantity());
+                    productDetails.put("id", cart.getId());
                     return productDetails;
                 }
                 return null;
