@@ -145,8 +145,4 @@ public class searchController {
         return ResponseEntity.ok(comment);
     }
 
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 585740887e5f96ec3be9e63fca9b05e8a93f87ef

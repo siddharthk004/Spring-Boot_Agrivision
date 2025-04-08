@@ -97,6 +97,7 @@ public class OrderService {
         orderItem.setProduct(product);
         orderItem.setQuantity(quantity);
         orderItem.setPrice(product.getAfterdiscount() * quantity);
+        orderItem.setCustomerId(order.getUser());
         return orderItem;
     }
 
@@ -111,14 +112,13 @@ public class OrderService {
         response.setOrderId(order.getId());
         response.setUserId(order.getUser().getId());
 
-        
         List<OrderItemDTO> orderItemDTOs = order.getOrderItems().stream()
                 .map(orderItem -> new OrderItemDTO(
-                        orderItem.getProduct().getId(), 
+                        orderItem.getProduct().getId(),
                         orderItem.getQuantity()))
                 .collect(Collectors.toList());
 
-        response.setOrderItems(orderItemDTOs); 
+        response.setOrderItems(orderItemDTOs);
 
         response.setSubtotal(order.getSubTotal());
         response.setOrderStatus(order.getOrderstatus());
@@ -128,21 +128,35 @@ public class OrderService {
         return response;
     }
 
-    public List<Order> getAllOrders() {
-        return orderrepo.findAll();
+    @Transactional
+    public List<OrderResponse> getAllOrders() {
+        List<Order> orders = orderrepo.findAll();
+        return orders.stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<Order> getOrdersByUserId(Long userId) {
-        return orderrepo.findByUserId(userId);
+    @Transactional
+    public List<OrderResponse> getOrdersByUserId(Long userId) {
+        List<Order> orders = orderrepo.findByUserId(userId);
+        return orders.stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
     }
 
-   
-    public Optional<Order> getOrderById(Long orderId) {
-        return orderrepo.findById(orderId);
+    @Transactional
+    public OrderResponse getOrderById(Long orderId) {
+        Order order = orderrepo.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+        return mapToOrderResponse(order);
     }
 
-    public Order getOrderByIdForUser(Long orderId, Long userId) {
-        return orderrepo.findByIdAndUserId(orderId, userId);
+    @Transactional
+    public OrderResponse getOrderByIdForUser(Long orderId, Long userId) {
+        Order order = orderrepo.findByIdAndUserId(orderId, userId);
+        if (order == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Order not accessible");
+        }
+        return mapToOrderResponse(order);
     }
-
 }

@@ -360,18 +360,9 @@ public ResponseEntity<?> getAllWishlistItems(@RequestHeader("Authorization") Str
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-<<<<<<< HEAD
-=======
 
     @PostMapping("/user/product/category/{category}")
     public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) {
         return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
     }
->>>>>>> 585740887e5f96ec3be9e63fca9b05e8a93f87ef
-
-    @PostMapping("/user/product/category/{category}")
-    public ResponseEntity<List<product>> getProductsByCategory(@PathVariable("category") String category) {
-        return new ResponseEntity<>(service.getProductByCategory(category), HttpStatus.OK);
-    }
-
 }
