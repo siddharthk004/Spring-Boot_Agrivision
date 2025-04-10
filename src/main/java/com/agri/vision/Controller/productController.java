@@ -144,6 +144,37 @@ public class productController {
         }
     }
 
+
+    ///////////////////////////////////////////
+    // Name : Siddharth Kardile
+    // day , Date : Thursday 23 jan 2025
+    // Function : Delete Cart Product by id
+    // Give id and delete that id product
+    ///////////////////////////////////////////
+    @DeleteMapping("/user/deleteCart/{id}")
+    public ResponseEntity<?> deleteCartById(@PathVariable Long id) {
+        try {
+            // Check if the wishlist exists
+            Cart cart = cartrepo.findById(id)
+                    .orElseThrow(() -> new RuntimeException("cart not found with ID: " + id));
+
+            // Delete the wishlist item
+            cartrepo.delete(cart);
+
+            // Return success response
+            return ResponseEntity.ok(new messageHelper(true, "cart item deleted successfully with ID: " + id));
+        } catch (RuntimeException e) {
+            // Handle specific exception when wishlist item is not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new messageHelper(false, e.getMessage()));
+        } catch (Exception e) {
+            // Handle generic exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new messageHelper(false, "An error occurred: " + e.getMessage()));
+        }
+    }
+
+    
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
     // day , Date : Thursday 23 jan 2025
@@ -183,35 +214,7 @@ public class productController {
         }
     }
 
-    ///////////////////////////////////////////
-    // Name : Siddharth Kardile
-    // day , Date : Thursday 23 jan 2025
-    // Function : Delete Cart Product by id
-    // Give id and delete that id product
-    ///////////////////////////////////////////
-    @DeleteMapping("/user/deleteCart/{id}")
-    public ResponseEntity<?> deleteCartById(@PathVariable Long id) {
-        try {
-            // Check if the wishlist exists
-            Cart cart = cartrepo.findById(id)
-                    .orElseThrow(() -> new RuntimeException("cart not found with ID: " + id));
-
-            // Delete the wishlist item
-            cartrepo.delete(cart);
-
-            // Return success response
-            return ResponseEntity.ok(new messageHelper(true, "cart item deleted successfully with ID: " + id));
-        } catch (RuntimeException e) {
-            // Handle specific exception when wishlist item is not found
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new messageHelper(false, e.getMessage()));
-        } catch (Exception e) {
-            // Handle generic exceptions
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new messageHelper(false, "An error occurred: " + e.getMessage()));
-        }
-    }
-
+    
     ///////////////////////////////////////////
     // Name : Siddharth Kardile
     // day , Date : Thursday 23 jan 2025

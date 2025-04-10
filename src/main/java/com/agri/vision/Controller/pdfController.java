@@ -23,10 +23,10 @@ import com.agri.vision.Service.PdfGeneratorService;
 
 @RestController
 @RequestMapping("/api/v1/auth/user/")
-public class PdfController {
+public class pdfController {
     private final PdfGeneratorService pdfGeneratorService;
 
-    public PdfController(PdfGeneratorService pdfGeneratorService) {
+    public pdfController(PdfGeneratorService pdfGeneratorService) {
         this.pdfGeneratorService = pdfGeneratorService;
     }
 
